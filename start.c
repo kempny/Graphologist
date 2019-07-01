@@ -4,6 +4,7 @@ start numer_portu
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <errno.h>
 #include <wait.h>
 #include <sys/types.h>
@@ -26,7 +27,7 @@ time_t czas1;
 time_t czas2;
 struct tm *loctime;
 #define PRZERWA 100000 // 0,1 sekundy
-#define TIMEOUT 60 // 60 sekund na podpis
+#define TIMEOUT 600 // 60 sekund na podpis
 int tmoutid;
 
 char buf[200];
@@ -72,8 +73,8 @@ void main (argc, argv)
      printf( "Musisz podac numer portu, np.\n ./start 5977\n");
      exit(1);
      }
-
-//  zaprogramuj socket
+    
+//  socket programming
 
     char buffer[256];
     struct sockaddr_in serv_addr, cli_addr;
@@ -113,14 +114,14 @@ po_interrupt:
       int flags = fcntl(newsockfd, F_GETFL, 0);
       fcntl(newsockfd, F_SETFL, flags |O_RDWR | O_NONBLOCK  | O_NDELAY);
 /*
-// odbierz numer dokumentu
+// picture name 
      m=0;
      jest=0;
      buf[m]='0';
      time (&czas1);
      time (&czas2);
 
-     while (czas2 - czas1 < 3) // 3 sekundy na nazwe miasta, potem timeout
+     while (czas2 - czas1 < 3) // 3 seconds,  timeout
       {
          if ((read (newsockfd, &buf[m], 1)) != -1)
            {
@@ -142,14 +143,14 @@ po_interrupt:
       goto listen;
      }
 */
-// odbierz tresc
+// copntents
      m=0;
      jest=0;
      buf[m]='0';
      time (&czas1);
      time (&czas2);
 
-     while (czas2 - czas1 < 3) // 3 sekundy na tresc, potem timeout
+     while (czas2 - czas1 < 3) // 3 seconds, timeout
       {
          if ((read (newsockfd, &buf[m], 1)) != -1)
            {
@@ -169,14 +170,14 @@ po_interrupt:
       goto listen;
      }
 strcpy(tresc, buf);
-// odbierz miasto
+// city
      m=0;
      jest=0;
      buf[m]='0';
      time (&czas1);
      time (&czas2);
 
-     while (czas2 - czas1 < 3) // 3 sekundy na tresc, potem timeout
+     while (czas2 - czas1 < 3) // 3 seconds, timeout
       {
          if ((read (newsockfd, &buf[m], 1)) != -1)
            {
@@ -196,14 +197,14 @@ strcpy(tresc, buf);
       goto listen;
      }
 strcpy(miasto, buf);
-// odbierz imie
+// first name
      m=0;
      jest=0;
      buf[m]='0';
      time (&czas1);
      time (&czas2);
 
-     while (czas2 - czas1 < 3) // 3 sekundy na tresc, potem timeout
+     while (czas2 - czas1 < 3) // 3 seconds, timeout
       {
          if ((read (newsockfd, &buf[m], 1)) != -1)
            {
@@ -223,14 +224,14 @@ strcpy(miasto, buf);
       goto listen;
      }
 strcpy(imie, buf);
-// odbierz nazwisko
+// last name
      m=0;
      jest=0;
      buf[m]='0';
      time (&czas1);
      time (&czas2);
 
-     while (czas2 - czas1 < 3) // 3 sekundy na tresc, potem timeout
+     while (czas2 - czas1 < 3) // 3 seconds timeout
       {
          if ((read (newsockfd, &buf[m], 1)) != -1)
            {
@@ -251,22 +252,21 @@ strcpy(imie, buf);
      }
 strcpy(nazwisko, buf);
 
-// odpal program w okienku
+// display window to sign
      podpisane=0;
      ret=sign(tresc, miasto, imie, nazwisko);
 
-// kod exit = 1 - podpisano, 2 - anulowan, 3 - timeout:
+// exit code = 1 - signed, 2 - canceled, 3 - timeout:
     
      sprintf(buf, "%02d\n", ret); 
      write(newsockfd, buf, strlen(buf));
-// wyslij do programu glownego
+// send to client program
      if(ret==1)
         sendpng();
      shutdown(newsockfd,2);
      close(newsockfd);
   } 
-} //od main
-
+} // main
 
 
 
@@ -274,12 +274,9 @@ static void
 clear_surface (void)
 {
   cairo_t *cr;
-
   cr = cairo_create (surface);
-
   cairo_set_source_rgb (cr, 1, 1, 1);
   cairo_paint (cr);
-
   cairo_destroy (cr);
 }
 
@@ -297,9 +294,9 @@ FILE *fp;
     cairo_surface_destroy (surface);
 
   surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
-                                               CAIRO_CONTENT_COLOR,
-                                               gtk_widget_get_allocated_width (widget),
-                                               gtk_widget_get_allocated_height (widget));
+                                        CAIRO_CONTENT_COLOR,
+                                        gtk_widget_get_allocated_width (widget),
+                                        gtk_widget_get_allocated_height (widget));
   /* Initialize the surface to white */
  cairo_t *cr;
     clear_surface ();
@@ -313,7 +310,6 @@ loctime = localtime (&czasb);
 strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
 sprintf(tekst, "%s, dnia %s", miasto, buffer);
 cairo_show_text (cr, tekst);
-
 cairo_move_to (cr, 1, 38);
 fp = fopen (tresc2, "r"); 
 fgets (buffer, 100, fp);
@@ -321,9 +317,9 @@ fclose(fp);
 
 
 cairo_set_font_size (cr, 20.2);
-buffer[strlen(buffer)-1] = '\x00'; // usun 0A
-strncpy(tekst2, buffer, 60);  // do wyswietlania pozniej przy 'popraw'
-strcpy(tekst3, &buffer[60]);  // do wyswietlania pozniej przy 'popraw'
+buffer[strlen(buffer)-1] = '\x00'; // remove 0A
+strncpy(tekst2, buffer, 60);  
+strcpy(tekst3, &buffer[60]);  
 cairo_show_text (cr, tekst2);
 cairo_move_to (cr, 1, 58);
 cairo_show_text (cr, tekst3);
@@ -336,8 +332,6 @@ cairo_show_text (cr, tekst);
 cairo_destroy (cr);
       gtk_widget_queue_draw (widget);
 
-
-  /* We've handled the configure event, no need for further processing. */
   return TRUE;
 }
 /* Redraw the screen from the surface. Note that the ::draw
@@ -364,7 +358,6 @@ double a;
 int poczx, poczy;
   cairo_t *cr;
 
-  /* Paint to the surface, where we store our state */
   cr = cairo_create (surface);
   cairo_set_source_rgb (cr, 0, 0.0, 1.0);
   cairo_rectangle (cr, x - 1, y - 1, 2, 2);
@@ -375,7 +368,7 @@ int poczx, poczy;
   clock_gettime(CLOCK_REALTIME, &tim1);
   if((tim1.tv_sec-tim.tv_sec)*1000000 + (tim1.tv_nsec - tim.tv_nsec)/1000 < PRZERWA) //microsec
    {
-    /* wyswietl punkty pomiedzy */
+    /* draw the line between rectangles */
     cr = cairo_create (surface);
     cairo_set_source_rgb (cr, 0, 0, 1.0);
     cairo_move_to (cr, xx, yy);
@@ -438,16 +431,9 @@ motion_notify_event_cb (GtkWidget      *widget,
   if (event->state & GDK_BUTTON1_MASK)
     draw_brush (widget, event->x, event->y);
 
-  /* We've handled it, stop processing */
   return TRUE;
 }
 
-static void
-close_window (void)
-{
-  if (surface)
-    cairo_surface_destroy (surface);
-}
 
 static gboolean
 popraw (GtkWidget      *widget)
@@ -462,43 +448,43 @@ FILE *fp;
     cairo_surface_destroy (surface);
 
   surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
-                                               CAIRO_CONTENT_COLOR,
-                                               gtk_widget_get_allocated_width (widget),
-                                               gtk_widget_get_allocated_height (widget));
+                                        CAIRO_CONTENT_COLOR,
+                                        gtk_widget_get_allocated_width (widget),
+                                        gtk_widget_get_allocated_height (widget));
       clear_surface ();
-cr = cairo_create (surface);
-cairo_select_font_face (cr, "FreeSans",
-    CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-cairo_move_to (cr, 1, 15);
-cairo_set_font_size (cr, 18.2);
-time(&czasb);
-loctime = localtime (&czasb);
-strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
-sprintf(tekst, "%s, dnia %s", miasto, buffer);
-cairo_show_text (cr, tekst);
+      cr = cairo_create (surface);
+      cairo_select_font_face (cr, "FreeSans",
+      CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+      cairo_move_to (cr, 1, 15);
+      cairo_set_font_size (cr, 18.2);
+      time(&czasb);
+      loctime = localtime (&czasb);
+      strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
+      sprintf(tekst, "%s, dnia %s", miasto, buffer);
+      cairo_show_text (cr, tekst);
+      cairo_move_to (cr, 1, 38);
+      cairo_set_font_size (cr, 20.2);
+      cairo_show_text (cr, tekst2);
+      cairo_move_to (cr, 1, 58);
+      cairo_show_text (cr, tekst3);
 
-cairo_move_to (cr, 1, 38);
+      cairo_move_to (cr, 1, 80);
+      cairo_set_font_size (cr, 18.2);
+      sprintf(tekst, "%s %s", imie, nazwisko);
+      cairo_show_text (cr, tekst);
 
-cairo_set_font_size (cr, 20.2);
-cairo_show_text (cr, tekst2);
-cairo_move_to (cr, 1, 58);
-cairo_show_text (cr, tekst3);
-
-cairo_move_to (cr, 1, 80);
-cairo_set_font_size (cr, 18.2);
-sprintf(tekst, "%s %s", imie, nazwisko);
-cairo_show_text (cr, tekst);
-
-cairo_destroy (cr);
+      cairo_destroy (cr);
       gtk_widget_queue_draw (widget);
 
       return TRUE;
     }
+
 int sendpng()
 {
-/* wysyla obraz w blokach po maksymalnie 100 bajtow, dodatkowo piewszy bajt 
-   to liczba bajtow tresci i ostatni - xor bajtow tresci.
-   Koniec transmisji - blok bez tresci, tylko pierwszy bajt = 0  */
+/* send the png to client, in blocks:
+   lenght, 100 bytes of data, XOR of data bytes
+   end of transmission - lenght = 0 */
+
 int fd;
 unsigned char buf[102];
 unsigned char crc=0;
@@ -513,23 +499,20 @@ int ii;
    ccount = count;
    crc = 0;
    write(newsockfd, &ccount,1);
-//printf("count:%02x ", ccount);fflush(0);
    for(ii=0; ii<count; ii++)
     {
      crc=crc^buf[ii];
      write(newsockfd, &buf[ii],1);
-//printf("znak:%02x ", buf[ii]);fflush(0);
     }
    write(newsockfd, &crc, 1);
-//printf("crc_sent:%02x ", crc);fflush(0);
   }
 }
 
 static gboolean
 wyslij (GtkWidget      *widget, GtkWindow *window)
-    {
-char tekst[100];
-char buffer[100];
+ {
+  char tekst[100];
+  char buffer[100];
 
   cairo_t *cr;
       cairo_surface_write_to_png (surface, "podpis.png");
@@ -537,28 +520,28 @@ char buffer[100];
     cairo_surface_destroy (surface);
 
   surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
-                                               CAIRO_CONTENT_COLOR,
-                                               gtk_widget_get_allocated_width (widget),
-                                               gtk_widget_get_allocated_height (widget));
-      clear_surface ();
-cr = cairo_create (surface);
-cairo_select_font_face (cr, "FreeSans",
-    CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-cairo_move_to (cr, 17, 75);
-cairo_set_font_size (cr, 28.2);
-if (podpisane>50)
-  strcpy(tekst, "Wysyłam do serwera");
-else
-  strcpy(tekst, "Brak podpisu, powtórz");
-cairo_show_text (cr, tekst);
-cairo_destroy (cr);
+                                        CAIRO_CONTENT_COLOR,
+                                        gtk_widget_get_allocated_width (widget),
+                                        gtk_widget_get_allocated_height (widget));
+  clear_surface ();
+  cr = cairo_create (surface);
+  cairo_select_font_face (cr, "FreeSans",
+  CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_move_to (cr, 17, 75);
+  cairo_set_font_size (cr, 28.2);
+  if (podpisane>50)
+    strcpy(tekst, "Wysyłam do serwera");
+  else
+    strcpy(tekst, "Brak podpisu, powtórz");
+  cairo_show_text (cr, tekst);
+  cairo_destroy (cr);
 
-      gtk_widget_queue_draw (widget);
-while (gtk_events_pending ())
+  gtk_widget_queue_draw (widget);
+  while (gtk_events_pending ())
         gtk_main_iteration ();
-      sleep(2);
+  sleep(2);
 
-if (podpisane>50)
+  if (podpisane>50)
    {
       gtk_window_close(window);
       while (gtk_events_pending ())
@@ -567,44 +550,44 @@ if (podpisane>50)
       ret = 1;
       return(ret);
    }
-else
-  {
-  cairo_t *cr;
+  else
+   {
+    cairo_t *cr;
       podpisane=0;
-  if (surface)
+    if (surface)
     cairo_surface_destroy (surface);
 
-  surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
-                                               CAIRO_CONTENT_COLOR,
-                                               gtk_widget_get_allocated_width (widget),
-                                               gtk_widget_get_allocated_height (widget));
-      clear_surface ();
-cr = cairo_create (surface);
-cairo_select_font_face (cr, "FreeSans",
+    surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
+                                        CAIRO_CONTENT_COLOR,
+                                        gtk_widget_get_allocated_width (widget),
+                                        gtk_widget_get_allocated_height (widget));
+    clear_surface ();
+    cr = cairo_create (surface);
+    cairo_select_font_face (cr, "FreeSans",
     CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-cairo_move_to (cr, 1, 15);
-cairo_set_font_size (cr, 18.2);
-time(&czasb);
-loctime = localtime (&czasb);
-strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
-sprintf(tekst, "%s, dnia %s", miasto, buffer);
-cairo_show_text (cr, tekst);
+    cairo_move_to (cr, 1, 15);
+    cairo_set_font_size (cr, 18.2);
+    time(&czasb);
+    loctime = localtime (&czasb);
+    strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
+    sprintf(tekst, "%s, dnia %s", miasto, buffer);
+    cairo_show_text (cr, tekst);
 
-cairo_move_to (cr, 1, 35);
+    cairo_move_to (cr, 1, 35);
 
-cairo_set_font_size (cr, 14.2);
-cairo_show_text (cr, tekst2);
+    cairo_set_font_size (cr, 14.2);
+    cairo_show_text (cr, tekst2);
 
-cairo_move_to (cr, 1, 55);
-cairo_set_font_size (cr, 18.2);
-sprintf(tekst, "%s %s", imie, nazwisko);
-cairo_show_text (cr, tekst);
+    cairo_move_to (cr, 1, 55);
+    cairo_set_font_size (cr, 18.2);
+    sprintf(tekst, "%s %s", imie, nazwisko);
+    cairo_show_text (cr, tekst);
 
-cairo_destroy (cr);
-      gtk_widget_queue_draw (widget);
-      return TRUE;
-  }
-    }
+    cairo_destroy (cr);
+    gtk_widget_queue_draw (widget);
+    return TRUE;
+   }
+ }
 
 static gboolean
 tmout (gpointer      window)
@@ -640,12 +623,14 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   GObject *tekst;
   GObject *podpis;
   GtkWidget *view;
+  GtkWidget *text;
   GtkTextBuffer *buffer;
   GObject *button;
   GFile   *file;
   gchar *contents;
   gsize length;
   GtkStyleContext *context;
+  GtkStyleContext *context1;
   GtkTextTag *tag;
   GtkTextIter start, end;
 
@@ -668,52 +653,54 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
       return 1;
     }
 
-window = gtk_builder_get_object (builder, "window");
-gtk_window_set_title (GTK_WINDOW (window), "Grafolog 1.0");
- gtk_window_maximize (GTK_WINDOW (window));
+  window = gtk_builder_get_object (builder, "window");
+  gtk_window_set_title (GTK_WINDOW (window), "Graphologist 1.1");
+  gtk_window_maximize (GTK_WINDOW (window));
 
-tekst = gtk_builder_get_object (builder, "tresc");
-view = gtk_text_view_new ();
-buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
-gtk_widget_show (view);
-gtk_container_add(GTK_CONTAINER(tekst) , view);
-file = g_file_new_for_path(tresc1);
-if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
-{
-gtk_text_buffer_set_text (buffer, contents, length);
-}
+  tekst = gtk_builder_get_object (builder, "tresc");
+  view = gtk_text_view_new ();
+  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+  gtk_widget_show (view);
+  gtk_container_add(GTK_CONTAINER(tekst) , view);
+  file = g_file_new_for_path(tresc1);
+  if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
+   {
+    gtk_text_buffer_set_text (buffer, contents, length);
+   }
 
-GtkCssProvider *provider = gtk_css_provider_new();
-context = gtk_widget_get_style_context (view);
-gtk_style_context_add_provider (context,
+  GtkCssProvider *provider = gtk_css_provider_new();
+  GtkCssProvider *provider1 = gtk_css_provider_new();
+  context = gtk_widget_get_style_context (view);
+  context1 = gtk_widget_get_style_context (view);
+  gtk_style_context_add_provider (context,
                                 GTK_STYLE_PROVIDER (provider),
                                 GTK_STYLE_PROVIDER_PRIORITY_USER);
-gtk_css_provider_load_from_data (provider,
+  gtk_style_context_add_provider (context1,
+                                GTK_STYLE_PROVIDER (provider1),
+                                GTK_STYLE_PROVIDER_PRIORITY_USER);
+  gtk_css_provider_load_from_data (provider,
                                  "textview {"
-                                 "  color: red;"
                                  " font: 20px serif;"
-                                 " background: red;"
+                                 "}",
+                                 -1,
+                                 NULL);
+  gtk_css_provider_load_from_data (provider1,
+                                 "text {"
+                                 "  color: black;"
+                                 " background-color: lightgrey;"
                                  "}",
                                  -1,
                                  NULL);
 
-/* Change left margin throughout the widget */
-gtk_text_view_set_left_margin (GTK_TEXT_VIEW (view), 3);
+  gtk_text_view_set_left_margin (GTK_TEXT_VIEW (view), 3);
 
-/* Use a tag to change the color for just one part of the widget */
-//tag = gtk_text_buffer_create_tag (buffer, "blue_foreground",
-//                        "foreground", "blue", NULL);  
-//gtk_text_buffer_get_iter_at_offset (buffer, &start, 7);
-//gtk_text_buffer_get_iter_at_offset (buffer, &end, 12);
-//gtk_text_buffer_apply_tag (buffer, tag, &start, &end);
-g_free (contents);
+  g_free (contents);
 
   podpis = gtk_builder_get_object (builder, "podpis");
   drawing_area = gtk_drawing_area_new ();
 
   gtk_widget_show (drawing_area);
 
-  /* Signals used to handle the backing surface */
   g_signal_connect (drawing_area, "draw",
                     G_CALLBACK (draw_cb), NULL);
   g_signal_connect (drawing_area,"configure-event",
@@ -741,7 +728,6 @@ g_free (contents);
   g_signal_connect_swapped (button, "clicked", G_CALLBACK (anuluj), window);
   button = gtk_builder_get_object (builder, "but3");
   g_signal_connect_swapped (button, "clicked", G_CALLBACK (wyslij), drawing_area), window;
-//  g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
 
   GtkCssProvider *cssProvider = gtk_css_provider_new();
   gtk_css_provider_load_from_path(cssProvider, "./button.css", NULL);
