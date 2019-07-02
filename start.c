@@ -316,6 +316,8 @@ fgets (buffer, 100, fp);
 fclose(fp);
 
 
+cairo_select_font_face (cr, "Liberation",
+    CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
 cairo_set_font_size (cr, 20.2);
 buffer[strlen(buffer)-1] = '\x00'; // remove 0A
 strncpy(tekst2, buffer, 60);  
@@ -325,6 +327,8 @@ cairo_move_to (cr, 1, 58);
 cairo_show_text (cr, tekst3);
 
 cairo_move_to (cr, 1, 80);
+cairo_select_font_face (cr, "FreeSans",
+    CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 cairo_set_font_size (cr, 18.2);
 sprintf(tekst, "%s %s", imie, nazwisko);
 cairo_show_text (cr, tekst);
@@ -454,7 +458,7 @@ FILE *fp;
       clear_surface ();
       cr = cairo_create (surface);
       cairo_select_font_face (cr, "FreeSans",
-      CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+         CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_move_to (cr, 1, 15);
       cairo_set_font_size (cr, 18.2);
       time(&czasb);
@@ -463,12 +467,16 @@ FILE *fp;
       sprintf(tekst, "%s, dnia %s", miasto, buffer);
       cairo_show_text (cr, tekst);
       cairo_move_to (cr, 1, 38);
+      cairo_select_font_face (cr, "Liberation",
+         CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, 20.2);
       cairo_show_text (cr, tekst2);
       cairo_move_to (cr, 1, 58);
       cairo_show_text (cr, tekst3);
 
       cairo_move_to (cr, 1, 80);
+      cairo_select_font_face (cr, "FreeSans",
+         CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (cr, 18.2);
       sprintf(tekst, "%s %s", imie, nazwisko);
       cairo_show_text (cr, tekst);
@@ -564,7 +572,7 @@ wyslij (GtkWidget      *widget, GtkWindow *window)
     clear_surface ();
     cr = cairo_create (surface);
     cairo_select_font_face (cr, "FreeSans",
-    CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+       CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_move_to (cr, 1, 15);
     cairo_set_font_size (cr, 18.2);
     time(&czasb);
@@ -573,12 +581,21 @@ wyslij (GtkWidget      *widget, GtkWindow *window)
     sprintf(tekst, "%s, dnia %s", miasto, buffer);
     cairo_show_text (cr, tekst);
 
-    cairo_move_to (cr, 1, 35);
+    cairo_select_font_face (cr, "Liberation",
+       CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
 
-    cairo_set_font_size (cr, 14.2);
+    cairo_set_font_size (cr, 20.2);
+    cairo_move_to (cr, 1, 38);
     cairo_show_text (cr, tekst2);
+    cairo_move_to (cr, 1, 58);
+    cairo_show_text (cr, tekst3);
 
-    cairo_move_to (cr, 1, 55);
+
+
+
+    cairo_move_to (cr, 1, 80);
+    cairo_select_font_face (cr, "FreeSans",
+       CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size (cr, 18.2);
     sprintf(tekst, "%s %s", imie, nazwisko);
     cairo_show_text (cr, tekst);
