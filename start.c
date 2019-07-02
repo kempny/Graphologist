@@ -308,7 +308,7 @@ cairo_set_font_size (cr, 18.2);
 time(&czasb);
 loctime = localtime (&czasb);
 strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
-sprintf(tekst, "%s, dnia %s", miasto, buffer);
+sprintf(tekst, "%s, %s", miasto, buffer);
 cairo_show_text (cr, tekst);
 cairo_move_to (cr, 1, 38);
 fp = fopen (tresc2, "r"); 
@@ -320,8 +320,8 @@ cairo_select_font_face (cr, "Liberation",
     CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
 cairo_set_font_size (cr, 20.2);
 buffer[strlen(buffer)-1] = '\x00'; // remove 0A
-strncpy(tekst2, buffer, 60);  
-strcpy(tekst3, &buffer[60]);  
+strncpy(tekst2, buffer, 59);  
+strcpy(tekst3, &buffer[59]);  
 cairo_show_text (cr, tekst2);
 cairo_move_to (cr, 1, 58);
 cairo_show_text (cr, tekst3);
@@ -464,7 +464,7 @@ FILE *fp;
       time(&czasb);
       loctime = localtime (&czasb);
       strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
-      sprintf(tekst, "%s, dnia %s", miasto, buffer);
+      sprintf(tekst, "%s, %s", miasto, buffer);
       cairo_show_text (cr, tekst);
       cairo_move_to (cr, 1, 38);
       cairo_select_font_face (cr, "Liberation",
@@ -578,7 +578,7 @@ wyslij (GtkWidget      *widget, GtkWindow *window)
     time(&czasb);
     loctime = localtime (&czasb);
     strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
-    sprintf(tekst, "%s, dnia %s", miasto, buffer);
+    sprintf(tekst, "%s, %s", miasto, buffer);
     cairo_show_text (cr, tekst);
 
     cairo_select_font_face (cr, "Liberation",
