@@ -54,7 +54,7 @@
         </child>
         <child>
           <object class="GtkButton" id="but1">
-            <property name="label" translatable="yes">Popraw</property>
+            <property name="label" translatable="yes">Clear</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -66,7 +66,7 @@
         </child>
         <child>
           <object class="GtkButton" id="but2">
-            <property name="label" translatable="yes">Anuluj</property>
+            <property name="label" translatable="yes">Cancel</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -78,7 +78,7 @@
         </child>
         <child>
           <object class="GtkButton" id="but3">
-            <property name="label" translatable="yes">Wyślij</property>
+            <property name="label" translatable="yes">Enter</property>
             <property name="visible">True</property>
             <property name="name">"but3"</property>
             <property name="can_focus">True</property>
