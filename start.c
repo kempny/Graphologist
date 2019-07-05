@@ -20,7 +20,10 @@ start numer_portu
 #include <netinet/in.h>
 #include <math.h>
 #include <gtk/gtk.h>
+#include <libintl.h>
+#include <locale.h>
 
+#define _(str) gettext (str)
 
 /*  zmienne  */
 time_t czas1;
@@ -65,12 +68,13 @@ void main (argc, argv)
      char *argv[];
 {
 
-
-
+  setlocale(LC_ALL,"");
+  bindtextdomain ("start", getenv("PWD"));
+  textdomain ("start");
 
     if (argc != 2)
      {
-     printf( "Musisz podac numer portu, np.\n ./start 5977\n");
+     printf( _("Usage: ./start port_number, e.g.\n ./start 5089\n"));
      exit(1);
      }
     
@@ -287,6 +291,7 @@ configure_event_cb (GtkWidget         *widget,
                     gpointer           data)
 {
 char tekst[100];
+
 char buffer[100];
 FILE *fp;
 
@@ -538,10 +543,10 @@ wyslij (GtkWidget      *widget, GtkWindow *window)
   cairo_move_to (cr, 17, 75);
   cairo_set_font_size (cr, 28.2);
   if (podpisane>50)
-    strcpy(tekst, "Wysyłam do serwera");
+    strcpy(tekst, _("Sending to server"));
   else
-    strcpy(tekst, "Brak podpisu, powtórz");
-  cairo_show_text (cr, tekst);
+    strcpy(tekst, _("No signature, repeat"));
+  cairo_show_text (cr, gettext(tekst));
   cairo_destroy (cr);
 
   gtk_widget_queue_draw (widget);
@@ -671,7 +676,7 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
     }
 
   window = gtk_builder_get_object (builder, "window");
-  gtk_window_set_title (GTK_WINDOW (window), "Graphologist 1.1");
+  gtk_window_set_title (GTK_WINDOW (window), _("Graphologist 1.1"));
   gtk_window_maximize (GTK_WINDOW (window));
 
   tekst = gtk_builder_get_object (builder, "tresc");
