@@ -1,0 +1,24 @@
+***************************************************
+localization procedure
+replace 'xx' with proper locale
+***************************************************
+Create directory structure for new localization:
+
+mkdir xx
+mkdir xx/LC_LOCALE
+
+Copy pot template to new directory
+
+cp pl/start.pot xx
+
+Initialize new template
+
+msginit --input=xx/start.pot --locale=xx --output=xx/start.po
+
+Edit the po file and translate strings
+
+vi xx/start.po 
+
+Compile the po file
+
+msgfmt --output-file=xx/LC_MESSAGES/start.mo xx/start.po
