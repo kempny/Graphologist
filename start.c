@@ -29,8 +29,8 @@ start numer_portu
 time_t czas1;
 time_t czas2;
 struct tm *loctime;
-#define PRZERWA 100000 // 0,1 sekundy
-#define TIMEOUT 600 // 60 sekund na podpis
+#define PRZERWA 100000 // 0,1 s
+#define TIMEOUT 60 // 60 seconds to sign
 int tmoutid;
 
 char buf[200];
