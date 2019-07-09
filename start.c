@@ -60,6 +60,7 @@ static cairo_surface_t *surface = NULL;
 int sockfd, newsockfd, portno, clilen;
 int sign();
 int sendpng();
+int odbierz();
 
 
 /* S T A R T */
@@ -117,8 +118,58 @@ po_interrupt:
       }
       int flags = fcntl(newsockfd, F_GETFL, 0);
       fcntl(newsockfd, F_SETFL, flags |O_RDWR | O_NONBLOCK  | O_NDELAY);
-/*
-// picture name 
+
+// content
+    jest =odbierz(tresc);
+    if (jest == 0)
+     {
+      close(newsockfd);
+      goto listen;
+     }
+
+// city
+    jest = odbierz(miasto);
+    if (jest == 0)
+     {
+      close(newsockfd);
+      goto listen;
+     }
+
+// first name
+    jest = odbierz(imie);
+    if (jest == 0)
+     {
+      close(newsockfd);
+      goto listen;
+     }
+
+// last name
+    jest = odbierz(nazwisko);
+    if (jest == 0)
+     {
+      close(newsockfd);
+      goto listen;
+     }
+
+// display window to sign
+     podpisane=0;
+     ret=sign(tresc, miasto, imie, nazwisko);
+
+// exit code = 1 - signed, 2 - canceled, 3 - timeout:
+    
+     sprintf(buf, "%02d\n", ret); 
+     write(newsockfd, buf, strlen(buf));
+// send to client program
+     if(ret==1)
+        sendpng();
+     shutdown(newsockfd,2);
+     close(newsockfd);
+  } 
+} // main
+
+int odbierz(char* tekst)
+{
+char buf[100];
      m=0;
      jest=0;
      buf[m]='0';
@@ -139,140 +190,9 @@ po_interrupt:
            }
          time (&czas2);
       }
-    strcpy(numer, buf);
-
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
-*/
-// copntents
-     m=0;
-     jest=0;
-     buf[m]='0';
-     time (&czas1);
-     time (&czas2);
-
-     while (czas2 - czas1 < 3) // 3 seconds, timeout
-      {
-         if ((read (newsockfd, &buf[m], 1)) != -1)
-           {
-            if (buf[m] == 0x0a)
-             {
-               buf[m]=0x0;
-               jest=1;
-               break;
-             }
-            m++;
-           }
-         time (&czas2);
-      }
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
-strcpy(tresc, buf);
-// city
-     m=0;
-     jest=0;
-     buf[m]='0';
-     time (&czas1);
-     time (&czas2);
-
-     while (czas2 - czas1 < 3) // 3 seconds, timeout
-      {
-         if ((read (newsockfd, &buf[m], 1)) != -1)
-           {
-            if (buf[m] == 0x0a)
-             {
-               buf[m]=0x0;
-               jest=1;
-               break;
-             }
-            m++;
-           }
-         time (&czas2);
-      }
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
-strcpy(miasto, buf);
-// first name
-     m=0;
-     jest=0;
-     buf[m]='0';
-     time (&czas1);
-     time (&czas2);
-
-     while (czas2 - czas1 < 3) // 3 seconds, timeout
-      {
-         if ((read (newsockfd, &buf[m], 1)) != -1)
-           {
-            if (buf[m] == 0x0a)
-             {
-               buf[m]=0x0;
-               jest=1;
-               break;
-             }
-            m++;
-           }
-         time (&czas2);
-      }
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
-strcpy(imie, buf);
-// last name
-     m=0;
-     jest=0;
-     buf[m]='0';
-     time (&czas1);
-     time (&czas2);
-
-     while (czas2 - czas1 < 3) // 3 seconds timeout
-      {
-         if ((read (newsockfd, &buf[m], 1)) != -1)
-           {
-            if (buf[m] == 0x0a)
-             {
-               buf[m]=0x0;
-               jest=1;
-               break;
-             }
-            m++;
-           }
-         time (&czas2);
-      }
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
-strcpy(nazwisko, buf);
-
-// display window to sign
-     podpisane=0;
-     ret=sign(tresc, miasto, imie, nazwisko);
-
-// exit code = 1 - signed, 2 - canceled, 3 - timeout:
-    
-     sprintf(buf, "%02d\n", ret); 
-     write(newsockfd, buf, strlen(buf));
-// send to client program
-     if(ret==1)
-        sendpng();
-     shutdown(newsockfd,2);
-     close(newsockfd);
-  } 
-} // main
-
-
+    strcpy(tekst, buf);
+    return(jest);
+}
 
 static void
 clear_surface (void)
