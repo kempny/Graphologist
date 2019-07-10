@@ -633,8 +633,6 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   GtkStyleContext *context1;
   GtkTextTag *tag;
   GtkTextIter start, end;
-  char buf[5000];
-  char buf1[5000];
 
   cairo_t *cr;
   int status;
@@ -648,8 +646,6 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   gtk_init (NULL, NULL);
 
   setlocale(LC_ALL,country);
-//  bindtextdomain ("start", getenv("PWD"));
-//  textdomain ("start");
 
   builder = gtk_builder_new ();
   if (gtk_builder_add_from_file (builder, "templ.glade", &error) == 0)
@@ -660,7 +656,7 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
     }
 
   window = gtk_builder_get_object (builder, "window");
-  gtk_window_set_title (GTK_WINDOW (window), _("Graphologist 1.1"));
+  gtk_window_set_title (GTK_WINDOW (window), _("Graphologist 1.7"));
   gtk_window_maximize (GTK_WINDOW (window));
 
   tekst = gtk_builder_get_object (builder, "tresc");
@@ -674,12 +670,12 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
     gtk_text_buffer_set_text (buffer, contents, length);
    }
 
-// cut the text in the right language
+// find the text in the right language
   if(strstr(contents, country_mark_s) != NULL &&
      strstr(contents, country_mark_e) != NULL)
    {
-     strcpy(buf, strstr(contents, country_mark_s));
-     strcpy(contents, strchr(buf, '\n'));
+     memmove(contents, strstr(contents, country_mark_s), length);
+     strcpy(contents, strchr(contents, '\n'));
      memset(strstr(contents, country_mark_e), 0,1);
    }
   else
