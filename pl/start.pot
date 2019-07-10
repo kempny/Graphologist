@@ -47,3 +47,6 @@ msgstr ""
  
 msgid "Content of the statement"
 msgstr ""
+ 
+msgid "No text in this language!"
+msgstr ""

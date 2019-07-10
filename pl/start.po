@@ -50,3 +50,6 @@ msgstr "Wyślij"
 
 msgid "Content of the statement"
 msgstr "Treść oświadczenia"
+
+msgid "No text in this language!"
+msgstr "Brak tekstu w tym języku"
