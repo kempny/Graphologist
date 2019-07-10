@@ -48,3 +48,6 @@ msgstr "Senden"
 
 msgid "Content of the statement"
 msgstr "Inhalt der Erklärung"
+
+msgid "No text in this language!"
+msgstr "Kein Text in dieser Sprache!"

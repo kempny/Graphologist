@@ -31,7 +31,8 @@ msgstr ""
 
 #: aa.c:79
 #, c-format
-msgid "Usage: ./start port_number, e.g.\n"
+msgid ""
+"Usage: ./start port_number, e.g.\n"
 " ./start 5089\n"
 msgstr ""
  
@@ -45,4 +46,7 @@ msgid "Send"
 msgstr ""
  
 msgid "Content of the statement"
+msgstr ""
+ 
+msgid "No text in this language!"
 msgstr ""
