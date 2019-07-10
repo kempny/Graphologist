@@ -55,6 +55,10 @@ char tresc1[100];
 char tresc2[100];
 char tekst2[100];
 char tekst3[100];
+char country[15];
+char country_mark_s[7];
+char country_mark_e[7];
+char saved_country[15];
 static cairo_surface_t *surface = NULL;
 
 int sockfd, newsockfd, portno, clilen;
@@ -68,10 +72,9 @@ void main (argc, argv)
      int argc;
      char *argv[];
 {
-
-  setlocale(LC_ALL,"");
-  bindtextdomain ("start", getenv("PWD"));
-  textdomain ("start");
+// save default environment locale
+    setlocale(LC_ALL,"");
+    strcpy(saved_country, setlocale(LC_ALL,NULL));
 
     if (argc != 2)
      {
@@ -119,52 +122,73 @@ po_interrupt:
       int flags = fcntl(newsockfd, F_GETFL, 0);
       fcntl(newsockfd, F_SETFL, flags |O_RDWR | O_NONBLOCK  | O_NDELAY);
 
+// locale
+      jest = odbierz(country);
+      if (jest == 0)
+        {
+         close(newsockfd);
+         goto listen;
+        }
+      setlocale(LC_ALL,country);
+      bindtextdomain ("start", getenv("PWD"));
+      textdomain ("start");
+      if (country[0] == 'C')
+       {
+        sprintf(country_mark_s, "<en>\n");
+        sprintf(country_mark_e, "</en>\n");
+       }
+      else
+       {
+        sprintf(country_mark_s, "<%c%c>\n", country[0], country[1]);
+        sprintf(country_mark_e, "</%c%c>\n", country[0], country[1]);
+       }
+
 // content
-    jest =odbierz(tresc);
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
+      jest = odbierz(tresc);
+      if (jest == 0)
+       {
+        close(newsockfd);
+        goto listen;
+       }
 
 // city
-    jest = odbierz(miasto);
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
+      jest = odbierz(miasto);
+      if (jest == 0)
+       {
+        close(newsockfd);
+        goto listen;
+       }
 
 // first name
-    jest = odbierz(imie);
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
+      jest = odbierz(imie);
+      if (jest == 0)
+       {
+        close(newsockfd);
+        goto listen;
+       }
 
 // last name
-    jest = odbierz(nazwisko);
-    if (jest == 0)
-     {
-      close(newsockfd);
-      goto listen;
-     }
-
+      jest = odbierz(nazwisko);
+      if (jest == 0)
+       {
+        close(newsockfd);
+        goto listen;
+       }
 // display window to sign
-     podpisane=0;
-     ret=sign(tresc, miasto, imie, nazwisko);
-
+      podpisane=0;
+      ret=sign(tresc, miasto, imie, nazwisko);
+  
 // exit code = 1 - signed, 2 - canceled, 3 - timeout:
     
-     sprintf(buf, "%02d\n", ret); 
-     write(newsockfd, buf, strlen(buf));
+      sprintf(buf, "%02d\n", ret); 
+      write(newsockfd, buf, strlen(buf));
 // send to client program
-     if(ret==1)
-        sendpng();
-     shutdown(newsockfd,2);
-     close(newsockfd);
-  } 
+      if(ret==1)
+       sendpng();
+      shutdown(newsockfd,2);
+      close(newsockfd);
+      setlocale(LC_ALL,saved_country);
+    } 
 } // main
 
 int odbierz(char* tekst)
@@ -212,7 +236,7 @@ configure_event_cb (GtkWidget         *widget,
 {
 char tekst[100];
 
-char buffer[100];
+char buffer[256];
 FILE *fp;
 
   if (surface)
@@ -225,43 +249,77 @@ FILE *fp;
   /* Initialize the surface to white */
  cairo_t *cr;
     clear_surface ();
-cr = cairo_create (surface);
-cairo_select_font_face (cr, "FreeSans",
+ cr = cairo_create (surface);
+ cairo_select_font_face (cr, "FreeSans",
     CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-cairo_move_to (cr, 1, 15);
-cairo_set_font_size (cr, 18.2);
-time(&czasb);
-loctime = localtime (&czasb);
-strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
-sprintf(tekst, "%s, %s", miasto, buffer);
-cairo_show_text (cr, tekst);
-cairo_move_to (cr, 1, 38);
-fp = fopen (tresc2, "r"); 
-fgets (buffer, 100, fp);
-fclose(fp);
+ cairo_move_to (cr, 1, 15);
+ cairo_set_font_size (cr, 18.2);
+ time(&czasb);
+ loctime = localtime (&czasb);
+ strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
+ sprintf(tekst, "%s, %s", miasto, buffer);
+ cairo_show_text (cr, tekst);
+ cairo_move_to (cr, 1, 38);
 
+ fp = fopen (tresc2, "r"); 
+// find starting mark of language
+ strcpy(buffer,"");
+ jest=0;
+  while (fgets (buffer, 100, fp) != NULL)
+    if (strcmp (buffer, country_mark_s) == 0)
+      {
+       jest = 1;
+       break;
+      } 
+// read the statement
+ if (jest ==1)
+   {
+    fgets (buffer, 256, fp);
+    fclose(fp);
+   }
+ else
+   {   //language  mark not found
+    fclose(fp);
+    fp = fopen (tresc2, "r"); 
+    while (fgets (buffer, 256, fp) != NULL)
+      if (strncmp (buffer, "<",1 ) == 0)
+      {
+       jest = 1;
+       break;
+      } 
+    if (jest ==1)
+     {
+      fgets (buffer, 256, fp);
+      fclose(fp);
+     }
+    else 
+     {
+       strcpy(buffer,"");
+       fclose(fp);
+     }
+   }
 
-cairo_select_font_face (cr, "Liberation",
+ cairo_select_font_face (cr, "Liberation",
     CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
-cairo_set_font_size (cr, 20.2);
-buffer[strlen(buffer)-1] = '\x00'; // remove 0A
-strncpy(tekst2, buffer, 59);  
-strcpy(tekst3, &buffer[59]);  
-cairo_show_text (cr, tekst2);
-cairo_move_to (cr, 1, 58);
-cairo_show_text (cr, tekst3);
+ cairo_set_font_size (cr, 20.2);
+ buffer[strlen(buffer)-1] = '\x00'; // remove 0A
+ strncpy(tekst2, buffer, 59);  
+ strcpy(tekst3, &buffer[59]);  
+ cairo_show_text (cr, tekst2);
+ cairo_move_to (cr, 1, 58);
+ cairo_show_text (cr, tekst3);
 
-cairo_move_to (cr, 1, 80);
-cairo_select_font_face (cr, "FreeSans",
-    CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-cairo_set_font_size (cr, 18.2);
-sprintf(tekst, "%s %s", imie, nazwisko);
-cairo_show_text (cr, tekst);
-
-cairo_destroy (cr);
-      gtk_widget_queue_draw (widget);
-
-  return TRUE;
+ cairo_move_to (cr, 1, 80);
+ cairo_select_font_face (cr, "FreeSans",
+     CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+ cairo_set_font_size (cr, 18.2);
+ sprintf(tekst, "%s %s", imie, nazwisko);
+ cairo_show_text (cr, tekst);
+ 
+ cairo_destroy (cr);
+       gtk_widget_queue_draw (widget);
+ 
+ return TRUE;
 }
 /* Redraw the screen from the surface. Note that the ::draw
  * signal receives a ready-to-be-used cairo_t that is already
@@ -368,7 +426,7 @@ static gboolean
 popraw (GtkWidget      *widget)
     {
 char tekst[100];
-char buffer[100];
+char buffer[256];
 FILE *fp;
 
   cairo_t *cr;
@@ -445,7 +503,7 @@ static gboolean
 wyslij (GtkWidget      *widget, GtkWindow *window)
  {
   char tekst[100];
-  char buffer[100];
+  char buffer[256];
 
   cairo_t *cr;
       cairo_surface_write_to_png (surface, "podpis.png");
@@ -575,6 +633,8 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   GtkStyleContext *context1;
   GtkTextTag *tag;
   GtkTextIter start, end;
+  char buf[5000];
+  char buf1[5000];
 
   cairo_t *cr;
   int status;
@@ -586,6 +646,10 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
 
   clock_gettime(CLOCK_REALTIME, &tim);
   gtk_init (NULL, NULL);
+
+  setlocale(LC_ALL,country);
+//  bindtextdomain ("start", getenv("PWD"));
+//  textdomain ("start");
 
   builder = gtk_builder_new ();
   if (gtk_builder_add_from_file (builder, "templ.glade", &error) == 0)
@@ -609,6 +673,20 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
    {
     gtk_text_buffer_set_text (buffer, contents, length);
    }
+
+// cut the text in the right language
+  if(strstr(contents, country_mark_s) != NULL &&
+     strstr(contents, country_mark_e) != NULL)
+   {
+     strcpy(buf, strstr(contents, country_mark_s));
+     strcpy(contents, strchr(buf, '\n'));
+     memset(strstr(contents, country_mark_e), 0,1);
+   }
+  else
+   { 
+     strcpy(contents, _("No text in this language!"));
+   }
+  gtk_text_buffer_set_text (buffer, contents, -1);
 
   GtkCssProvider *provider = gtk_css_provider_new();
   GtkCssProvider *provider1 = gtk_css_provider_new();

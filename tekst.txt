@@ -1,3 +1,4 @@
+<en>
 To be, or not to be: that is the question:
 Whether 'tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
@@ -33,4 +34,89 @@ With this regard their currents turn awry,
 And lose the name of action.—Soft you now!
 The fair Ophelia! Nymph, in thy orisons
 Be all my sins remember'd.
+</en>
+
+<pl>
+Być albo nie być to wielkie pytanie.
+Jest–li w istocie szlachetniejszą rzeczą
+Znosić pociski zawistnego losu
+Czy też stawiwszy czoło morzu nędzy,
+Przez opór wybrnąć z niego?  — Umrzeć — zasnąć —
+I na tym koniec. — Gdybyśmy wiedzieli,
+Że raz zasnąwszy, zakończym na zawsze
+Boleści serca i owe tysiączne
+Właściwe naszej naturze wstrząśnienia,
+Kres taki byłby celem na tej ziemi
+Najpożądańszym. Umrzeć — zasnąć. — Zasnąć!
+Może śnić? — w tym sęk cały, jakie bowiem
+W tym śnie śmiertelnym marzenia przyjść mogą,
+Kiedy zrzucimy z siebie więzy ciała,
+To zastanawia nas: i toć to czyni
+Tak długowieczną niedolę; bo któż by
+Ścierpiał pogardę i zniewagi świata,
+Krzywdy ciemiężcy, obelgi dumnego,
+Lekceważonej miłości męczarnie,
+Odwłokę prawa, butę władz i owe
+Upokorzenia, które nieustannie
+Cichej zasługi stają się udziałem,
+Gdyby od tego kawałkiem żelaza
+Mógł się uwolnić?  Któż by dźwigał ciężar
+Nudnego życia i pocił się pod nim,
+Gdyby obawa czegoś poza grobem,
+Obawa tego obcego nam kraju,
+Skąd nikt nie wraca, nie wątliła woli
+I nie kazała nam pędzić dni raczej
+W złem już wiadomym niż uchodząc przed nim
+Popadać w inne, którego nie znamy.
+Tak to rozwaga czyni nas tchórzami;
+Przedsiębiorczości hoża cera blednie
+Pod wpływem wahań i zamiary pełne
+Jędrności, zbite z wytkniętej kolei,
+Tracą nazwisko czynu. — Ha! co widzę?
+Piękna Ofelia! — Nimfo, w modłach swoich
+Pomnij o moich grzechach.
+</pl>
+<de>
+Sein oder Nichtsein; das ist hier die Frage:
+Obs edler im Gemüt, die Pfeil und Schleudern
+Des wütenden Geschicks erdulden oder,
+Sich waffnend gegen eine See von Plagen,
+Durch Widerstand sie enden? Sterben – schlafen –
+
+Nichts weiter! Und zu wissen, daß ein Schlaf
+Das Herzweh und die tausend Stöße endet,
+Die unsers Fleisches Erbteil, ’s ist ein Ziel,
+Aufs innigste zu wünschen. Sterben – schlafen –
+Schlafen! Vielleicht auch träumen! Ja, da liegts:
+
+Was in dem Schlaf für Träume kommen mögen,
+Wenn wir die irdische Verstrickung lösten,
+Das zwingt uns stillzustehn. Das ist die Rücksicht,
+Die Elend läßt zu hohen Jahren kommen.
+Denn wer ertrüg der Zeiten Spott und Geißel,
+
+Des Mächtigen Druck, des Stolzen Mißhandlungen,
+Verschmähter Liebe Pein, des Rechtes Aufschub,
+Den Übermut der Ämter und die Schmach,
+Die Unwert schweigendem Verdienst erweist,
+Wenn er sich selbst in Ruhstand setzen könnte
+
+Mit einer Nadel bloß? Wer trüge Lasten
+Und stöhnt’ und schwitzte unter Lebensmüh?
+Nur daß die Furcht vor etwas nach dem Tod,
+Das unentdeckte Land, von des Bezirk
+Kein Wandrer wiederkehrt, den Willen irrt,
+
+Daß wir die Übel, die wir haben, lieber
+Ertragen als zu unbekannten fliehn.
+So macht Bewußtsein Feige aus uns allen;
+Der angebornen Farbe der Entschließung
+Wird des Gedankens Blässe angekränkelt;
+
+Und Unternehmen, hochgezielt und wertvoll,
+Durch diese Rücksicht aus der Bahn gelenkt,
+Verlieren so der Handlung Namen. – Still!
+Die reizende Ophelia! – Nymphe, schließ
+In dein Gebet all meine Sünden ein! 
+</de>
 
