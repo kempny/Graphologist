@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: aa.c:682
-msgid "Graphologist 1.1"
+msgid "Graphologist 1.7"
 msgstr ""
 
 #: aa.c:551
