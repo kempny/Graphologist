@@ -10,11 +10,12 @@
       <object class="GtkGrid" id="siatka">
         <property name="width_request">-1</property>
         <property name="height_request">-1</property>
+        <property name="hexpand">True</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="column_spacing">7</property>
         <property name="row_homogeneous">True</property>
-        <property name="column_homogeneous">True</property>
+        <property name="column_homogeneous">False</property>
         <child>
           <object class="GtkViewport" id="podpis">
             <property name="name">podpis</property>

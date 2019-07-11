@@ -662,6 +662,7 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   tekst = gtk_builder_get_object (builder, "tresc");
   view = gtk_text_view_new ();
   buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+  gtk_widget_set_hexpand (view, TRUE);
   gtk_widget_show (view);
   gtk_container_add(GTK_CONTAINER(tekst) , view);
   file = g_file_new_for_path(tresc1);
