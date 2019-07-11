@@ -64,9 +64,9 @@ int sockfd, newsockfd, portno, clilen;
 
 
 
-    if (argc != 8)
+    if (argc != 9)
      {
-     printf( "./wyswietl IP PORT nazwa_zdjecia tresc miasto imie nazwisko\n");
+     printf( "./wyswietl IP PORT jezyk nazwa_zdjecia tresc miasto imie nazwisko\n");
      exit(1);
      }
   struct sockaddr_in serv_addr;
@@ -111,11 +111,11 @@ int sockfd, newsockfd, portno, clilen;
       printf("Brak polaczenia z wyswietlaczem\n");
       exit(1);
      }
-/*
+
     strcpy(buf, argv[3]);
     strcat(buf, "\n");
     write (sockfd, buf, strlen(buf));
-*/
+
     strcpy(buf, argv[4]);
     strcat(buf, "\n");
     write (sockfd, buf, strlen(buf));
@@ -129,6 +129,10 @@ int sockfd, newsockfd, portno, clilen;
     write (sockfd, buf, strlen(buf));
 
     strcpy(buf, argv[7]);
+    strcat(buf, "\n");
+    write (sockfd, buf, strlen(buf));
+
+    strcpy(buf, argv[8]);
     strcat(buf, "\n");
     write (sockfd, buf, strlen(buf));
   

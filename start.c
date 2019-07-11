@@ -34,7 +34,7 @@ struct tm *loctime;
 int tmoutid;
 
 char buf[200];
-char numer[100];
+char name[100];
 char imie[100];
 char nazwisko[100];
 char miasto[100];
@@ -50,7 +50,6 @@ int podpisane = 0;
 struct tm *loctime;
 time_t czasp, czasb;
 struct timespec tim, tim1;
-char numer[100];
 char tresc1[100];
 char tresc2[100];
 char tekst2[100];
@@ -121,6 +120,13 @@ po_interrupt:
       }
       int flags = fcntl(newsockfd, F_GETFL, 0);
       fcntl(newsockfd, F_SETFL, flags |O_RDWR | O_NONBLOCK  | O_NDELAY);
+//png name 
+      jest = odbierz(name);
+      if (jest == 0)
+       {
+        close(newsockfd);
+        goto listen;
+       }
 
 // locale
       jest = odbierz(country);
@@ -478,12 +484,14 @@ int sendpng()
 
 int fd;
 unsigned char buf[102];
+char pngname[50];
 unsigned char crc=0;
 ssize_t count=999;
 unsigned char ccount;
 int ii;
 
- fd = open("podpis.png", O_RDONLY);
+ sprintf(pngname, "%s.png", name);
+ fd = open(pngname, O_RDONLY);
  while (count>0)
   {
    count=read(fd,buf,100);
@@ -504,9 +512,11 @@ wyslij (GtkWidget      *widget, GtkWindow *window)
  {
   char tekst[100];
   char buffer[256];
+  char pngname[50];
 
   cairo_t *cr;
-      cairo_surface_write_to_png (surface, "podpis.png");
+      sprintf(pngname, "%s.png", name);
+      cairo_surface_write_to_png (surface, pngname);
   if (surface)
     cairo_surface_destroy (surface);
 
@@ -662,8 +672,8 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   tekst = gtk_builder_get_object (builder, "tresc");
   view = gtk_text_view_new ();
   buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
-  gtk_widget_set_hexpand (view, TRUE);
   gtk_widget_show (view);
+  gtk_widget_set_hexpand (view, TRUE);
   gtk_container_add(GTK_CONTAINER(tekst) , view);
   file = g_file_new_for_path(tresc1);
   if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
