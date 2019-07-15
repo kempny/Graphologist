@@ -1,8 +1,17 @@
+copy all files to server, except wyslij.c
+copy wyslij.c to client machine
 On Raspberry server:
 gcc `pkg-config --cflags gtk+-3.0` -o start start.c `pkg-config --libs gtk+-3.0`
 ./start 5089& 
 
 On Linux client:
 cc wyswietl.c -o wyswietl 
-./wyswietl 192.168.0.52 5089 zdjecie1 ./tekst Gliwice Boguslaw Kempny
- 
+./wyswietl 192.168.0.34 5089 signature1 pl_PL.UTF-8 ./tekst Gliwice Boguslaw Kempny
+
+192.168.0.34 - IP addr of server
+5089 - port number
+signature1 - filename of signature png
+pl_PL.UTF-8 (de_DE.utf8, en_EN.utf8, C) - language
+tekst - filename, statement to sign (.txt, .osw)
+Gliwice - the city
+Boguslaw Kempny - name of signing person
