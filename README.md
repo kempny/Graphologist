@@ -9,3 +9,8 @@ The wyslij.c is example client part, sending signing requests to the
 server and collecting the png image with signature.
 
 Principle of operation described in file [operating.md](/screenshots/operating.md)
+
+The program works in three language versions, english, german and polish (my native language).<br>
+Instructions for adding new languages in file [locale.txt](/locale.txt)
+
+
