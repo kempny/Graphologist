@@ -2,10 +2,10 @@
 
 ![Server is waiting ](/screenshots/standby.png?raw=true "Waiting")
 
-2. the client sends the signature command:
+2. The client sends the signature command:
 ./wyswietl 192.168.0.34 5089 signature1 en_EN.UTF-8 ./tekst Gliwice Boguslaw Kempny
 
-3. The server displays a window to sign
+3. The server displays a window to sign:
 
 ![Server is waiting fo sign ](/screenshots/ready_to_sign.png?raw=true "signing")
 
