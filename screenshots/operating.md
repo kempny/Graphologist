@@ -1,4 +1,4 @@
-1. Server in standby mode, waiting for command to sign:
+1. Server in standby mode, waiting for command to sign (wallpaper):
 
 ![Server is waiting ](/screenshots/standby.png?raw=true "Waiting")
 
