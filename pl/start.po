@@ -19,8 +19,8 @@ msgstr ""
 "|| n%100>=20) ? 1 : 2);\n"
 
 #: aa.c:682
-msgid "Graphologist 1.7"
-msgstr "Grafolog 1.7"
+msgid "Graphologist"
+msgstr "Grafolog"
 
 #: aa.c:551
 msgid "No signature, repeat"
