@@ -1,11 +1,12 @@
 /****************************************************
-wyswietl IP port numer miasto imie nazwisko
+wyswietl IP port pliki_oswiadczenia locale miasto imie nazwisko
 Kody powrotu:
 1 - podpisano
 2 - anulowano podpis
 3 - timeout podczas podpisywania
 4 - timeout polaczenia z urzadzeniem do podo[isywania
 5 - podpisano, ale blad transmisji pliku z podpisem
+6 - brak pliku z trescia oswiadczenia 
 *****************************************************/
 
 #include <stdio.h>

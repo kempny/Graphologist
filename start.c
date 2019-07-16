@@ -651,6 +651,11 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   strcpy(tresc2, tresc);
   strcat(tresc1, ".txt");
   strcat(tresc2, ".osw");
+//KUKU
+  if (access(tresc1, R_OK))
+  return 6;
+  if (access(tresc2, R_OK))
+  return 6;
 
   clock_gettime(CLOCK_REALTIME, &tim);
   gtk_init (NULL, NULL);
