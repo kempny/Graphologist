@@ -15,3 +15,14 @@ pl_PL.UTF-8 (de_DE.utf8, en_EN.utf8, C) - language
 tekst - filename, statement to sign (.txt, .osw)
 Gliwice - the city
 Boguslaw Kempny - name of signing person
+
+'wyswietl' returns:
+
+1 - signed
+2 - canceled
+3 - timeout during signing
+4 - timeout during connection to server
+5 - signed, but error in sending signature png
+6 - no file with statements (xxx.txt or xxx.osw)
+
+
