@@ -1,12 +1,12 @@
 /****************************************************
-wyswietl IP port pliki_oswiadczenia locale miasto imie nazwisko
-Kody powrotu:
-1 - podpisano
-2 - anulowano podpis
-3 - timeout podczas podpisywania
-4 - timeout polaczenia z urzadzeniem do podo[isywania
-5 - podpisano, ale blad transmisji pliku z podpisem
-6 - brak pliku z trescia oswiadczenia 
+wyswietl IP port statement_files locale city first_name last_name
+Return code:
+1 - signed
+2 - canceled
+3 - timeout during signing
+4 - timeout during connection to server
+5 - signed, but error in sending signature png
+6 - no file with statements (xxx.txt or xxx.osw)
 *****************************************************/
 
 #include <stdio.h>
@@ -67,7 +67,7 @@ int sockfd, newsockfd, portno, clilen;
 
     if (argc != 9)
      {
-     printf( "./wyswietl IP PORT jezyk nazwa_zdjecia tresc miasto imie nazwisko\n");
+     printf( "./wyswietl IP PORT statement_files locale city first_name last_name\n");
      exit(1);
      }
   struct sockaddr_in serv_addr;
@@ -91,7 +91,7 @@ int sockfd, newsockfd, portno, clilen;
     time (&czas1);   
     time (&czas2);   
     rob1=0;
-    while (czas2 - czas1 < 5) // 5 sekund na polaczenie z wyswietlaczem
+    while (czas2 - czas1 < 5) // 5 seconds to connect
      {
        if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
         {
@@ -109,7 +109,7 @@ int sockfd, newsockfd, portno, clilen;
      }
     if(!rob1)
      {
-      printf("Brak polaczenia z wyswietlaczem\n");
+      printf("Error connecting to server\n");
       exit(1);
      }
 
@@ -137,14 +137,14 @@ int sockfd, newsockfd, portno, clilen;
     strcat(buf, "\n");
     write (sockfd, buf, strlen(buf));
   
-// odbierz odpowiedz
+// Receive the answer
     m=0;
     jest=0;
     buf[m]='0';
     time (&czas1);
     time (&czas2);
 
-    while (czas2 - czas1 < 70) // 70 sekund na odpowiedz, potem timeout
+    while (czas2 - czas1 < 70) // 70 seconds timeout
       {
          if ((read (sockfd, &buf[m], 1)) != -1)
            {
@@ -166,7 +166,7 @@ int sockfd, newsockfd, portno, clilen;
     else
       printf("odpowiedz: %s\n", buf); fflush(0);
 
-    if(atoi(buf)==1)  // zlozono podpis
+    if(atoi(buf)==1)  // signed
      {
         time (&czas1);
         time (&czas2);
@@ -176,11 +176,11 @@ int sockfd, newsockfd, portno, clilen;
        for(;;)
         {
   
-         while (czas2 - czas1 < 6) // 6 sekund na transmisje, potem timeout
+         while (czas2 - czas1 < 6) // 6 seconds timeout
           {
             if ((read (sockfd, &byte, 1)) == 1)
              {
-               m=byte;   // liczba znakow w bloku 
+               m=byte;    
                  break;
              }
             time (&czas2);
@@ -190,7 +190,7 @@ int sockfd, newsockfd, portno, clilen;
          crc = 0;
          for (i=0;i<m;i++)
           {
-           while (czas2 - czas1 < 6) // 6 sekund na transmisje, potem timeout
+           while (czas2 - czas1 < 6) // 6 seconds timeout
             {
              if ((read (sockfd, &byte, 1)) == 1)
                {
@@ -201,13 +201,13 @@ int sockfd, newsockfd, portno, clilen;
              time (&czas2);
             } 
           }
-         while (czas2 - czas1 < 6) // 6 sekund na transmisje, potem timeout
+         while (czas2 - czas1 < 6) // 6 seconds timeout
           {
-            if ((read (sockfd, &byte, 1)) == 1) //odczytaj crc
+            if ((read (sockfd, &byte, 1)) == 1) // crc
              {
                if( byte != crc)
                  {
-                   printf("Blad transmisji");
+                   printf("Transmission error");
                    strcpy(buf,"5");
                  }
                break;
@@ -220,4 +220,4 @@ int sockfd, newsockfd, portno, clilen;
     close(fd);
     exit(atoi(buf));
 
-} //od main
+} // main
