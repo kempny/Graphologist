@@ -18,8 +18,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: aa.c:682
-msgid "Graphologist 1.7"
-msgstr "Graphologe 1.7"
+msgid "Graphologist"
+msgstr "Graphologe"
 
 #: aa.c:551
 msgid "No signature, repeat"
