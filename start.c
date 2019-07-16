@@ -646,6 +646,7 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
 
   cairo_t *cr;
   int status;
+  char tittle[20];
 
   strcpy(tresc1, tresc);
   strcpy(tresc2, tresc);
@@ -671,7 +672,8 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
     }
 
   window = gtk_builder_get_object (builder, "window");
-  gtk_window_set_title (GTK_WINDOW (window), _("Graphologist 1.7"));
+  sprintf(tittle, "%s 1.8", _("Graphologist"));
+  gtk_window_set_title (GTK_WINDOW (window), tittle);
   gtk_window_maximize (GTK_WINDOW (window));
 
   tekst = gtk_builder_get_object (builder, "tresc");
