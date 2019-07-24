@@ -61,7 +61,7 @@ void main (argc, argv)
      char *argv[];
 {
 
-int sockfd, newsockfd, portno, clilen;
+int sockfd, portno, clilen;
 
 
 
@@ -144,7 +144,8 @@ int sockfd, newsockfd, portno, clilen;
     time (&czas1);
     time (&czas2);
 
-    while (czas2 - czas1 < 70) // 70 seconds timeout
+    while (czas2 - czas1 < 7000) // 70 seconds timeout
+//    while (czas2 - czas1 < 70) // 70 seconds timeout
       {
          if ((read (sockfd, &buf[m], 1)) != -1)
            {
