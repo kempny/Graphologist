@@ -44,8 +44,16 @@ time_t czas;
 char data[55];
 struct tm *loctime;
 
-double xx;
-double yy;
+double xx0;
+double yy0;
+double xx1;
+double yy1;
+double xx2;
+double yy2;
+double xx3;
+double yy3;
+int pointno;
+
 int podpisane = 0;
 struct tm *loctime;
 time_t czasp, czasb;
@@ -64,16 +72,21 @@ int sockfd, newsockfd, portno, clilen;
 int sign();
 int sendpng();
 int odbierz();
-
+void catch_signal();
+void interpolate();
 
 /* S T A R T */
 void main (argc, argv)
      int argc;
      char *argv[];
 {
+    signal(SIGTERM, catch_signal);
+
 // save default environment locale
     setlocale(LC_ALL,"");
     strcpy(saved_country, setlocale(LC_ALL,NULL));
+    bindtextdomain ("start", getenv("PWD"));
+    textdomain ("start");
 
     if (argc != 2)
      {
@@ -135,9 +148,15 @@ po_interrupt:
          close(newsockfd);
          goto listen;
         }
+
+
+      if (strncmp(country, "en_EN",5) == 0) 
+        strcpy(country, "C");
+
       setlocale(LC_ALL,country);
       bindtextdomain ("start", getenv("PWD"));
       textdomain ("start");
+
       if (country[0] == 'C')
        {
         sprintf(country_mark_s, "<en>\n");
@@ -181,7 +200,17 @@ po_interrupt:
         goto listen;
        }
 // display window to sign
-      podpisane=0;
+      podpisane = 0;
+      pointno = 0;
+      xx0 = 0;
+      xx1 = 0;
+      xx2 = 0;
+      xx3 = 0;
+      yy0 = 0;
+      yy1 = 0;
+      yy2 = 0;
+      yy3 = 0;
+
       ret=sign(tresc, miasto, imie, nazwisko);
   
 // exit code = 1 - signed, 2 - canceled, 3 - timeout:
@@ -196,6 +225,18 @@ po_interrupt:
       setlocale(LC_ALL,saved_country);
     } 
 } // main
+
+void catch_signal(int signal_num)
+{
+  shutdown (newsockfd, 2);
+  shutdown (sockfd, 2);
+  close(newsockfd);
+  close(sockfd);
+  exit(0);
+  
+}
+
+
 
 int odbierz(char* tekst)
 {
@@ -327,6 +368,7 @@ FILE *fp;
  
  return TRUE;
 }
+
 /* Redraw the screen from the surface. Note that the ::draw
  * signal receives a ready-to-be-used cairo_t that is already
  * clipped to only draw the exposed areas of the widget
@@ -341,47 +383,126 @@ draw_cb (GtkWidget *widget,
 
   return FALSE;
 }
+
 /* Draw a rectangle on the surface at the given position */
 static void
 draw_brush (GtkWidget *widget,
             gdouble    x,
             gdouble    y)
 {
-double a;
-int poczx, poczy;
+  int poczx, poczy;
   cairo_t *cr;
-
   cr = cairo_create (surface);
-  cairo_set_source_rgb (cr, 0, 0.0, 1.0);
+  cairo_set_source_rgb (cr, 0, 0, 1.0);
   cairo_rectangle (cr, x - 1, y - 1, 2, 2);
   cairo_fill (cr);
   cairo_destroy (cr);
-  gtk_widget_queue_draw_area (widget, x - 1, y - 1, 2, 2);
+  gtk_widget_queue_draw_area (widget, x - 2, y - 2, 4, 4);
 
-  clock_gettime(CLOCK_REALTIME, &tim1);
-  if((tim1.tv_sec-tim.tv_sec)*1000000 + (tim1.tv_nsec - tim.tv_nsec)/1000 < PRZERWA) //microsec
+//KUKU
+  if(x != xx2 || y != yy2)
    {
-    /* draw the line between rectangles */
-    cr = cairo_create (surface);
-    cairo_set_source_rgb (cr, 0, 0, 1.0);
-    cairo_move_to (cr, xx, yy);
-    cairo_line_to (cr, x, y);
-    cairo_set_line_width (cr, 2);
-    cairo_stroke (cr);
-    cairo_destroy (cr);
-    
-    if (x < xx) poczx = x; else poczx = xx;
-    if (y < yy) poczy = y; else poczy = yy;
-    gtk_widget_queue_draw_area (widget, poczx-2, poczy-2, fabs(x - xx)+4, fabs(y - yy)+4);
+//  Continuation of line drawing
 
-    podpisane++;
+    clock_gettime(CLOCK_REALTIME, &tim1);
+    if((tim1.tv_sec-tim.tv_sec)*1000000 + (tim1.tv_nsec - tim.tv_nsec)/1000 < PRZERWA )
+     {
+       xx3 = x;
+       yy3 = y;
+
+       if (pointno == 1)
+        {    // draw straight line between first two points 
+         cr = cairo_create (surface);
+         cairo_set_source_rgb (cr, 0, 0, 1.0);
+         cairo_move_to (cr, xx2,  yy2);
+         cairo_line_to (cr, xx3,  yy3);
+         cairo_set_line_width (cr, 2);
+         cairo_stroke (cr);
+         if (xx2 < xx3) poczx = xx2; else poczx = xx3;
+         if (yy2 < yy3) poczy = yy2; else poczy = yy3;
+         gtk_widget_queue_draw_area 
+              (widget, poczx-2, poczy-2, fabs(xx3 - xx2)+4, fabs(yy3 - yy2)+4);
+        }
+       if (pointno > 2)
+         interpolate(widget); 
+     }
+    else
+     {
+// Begining of drawing a new line
+      if ((xx2 > 0 || yy2 > 0) && (pointno !=1))
+        {    // draw straight line between last two points ,
+             // cubic interpolation can not handle it
+         cr = cairo_create (surface);
+         cairo_set_source_rgb (cr, 0, 0, 1.0);
+         cairo_move_to (cr, xx1,  yy1);
+         cairo_line_to (cr, xx2,  yy2);
+         cairo_set_line_width (cr, 2);
+         cairo_stroke (cr);
+         if (xx1 < xx2) poczx = xx1; else poczx = xx2;
+         if (yy1 < yy2) poczy = yy1; else poczy = yy2;
+         gtk_widget_queue_draw_area
+              (widget, poczx-2, poczy-2, fabs(xx2 - xx1)+4, fabs(yy2 - yy1)+4);
+        }
+      pointno = 0;
+      xx2 = 0;
+      yy2 = 0;
+      xx3 = x;
+      yy3 = y;
+     } 
+
+      clock_gettime(CLOCK_REALTIME, &tim);
+      pointno++;
+      podpisane++;
+      xx0 = xx1;
+      yy0 = yy1;
+      xx1 = xx2;
+      yy1 = yy2;
+      xx2 = xx3;
+      yy2 = yy3;
    }
-
-    clock_gettime(CLOCK_REALTIME, &tim);
-    xx = x;
-    yy = y;
-
 }
+
+
+void interpolate(GtkWidget *widget)
+{
+  cairo_t *cr;
+
+    /* interpolate points between rectangles, cubic interpolation */
+  int poczx, poczy;
+  double delta;
+  double a0,a1,a2,a3;
+  double xp, xk;
+  double yp, yk;
+
+  cr = cairo_create (surface);
+  cairo_set_source_rgb (cr, 0, 0, 1.0);
+  xp = xx1;
+  yp = yy1;
+
+  for (delta=.01; delta < .999; delta = delta + .01)
+     {
+      a0 = -0.5*yy0 + 1.5*yy1 - 1.5*yy2 + 0.5*yy3;
+      a1 = yy0 - 2.5*yy1 + 2*yy2 - 0.5*yy3;
+      a2 = -0.5*yy0 + 0.5*yy2;
+      a3 = yy1;
+      yk = a0*delta*delta*delta+a1*delta*delta+a2*delta+a3;
+      xk = xx1 + delta * (xx2 - xx1);
+      cairo_move_to (cr, xp,  yp);
+      cairo_line_to (cr, xk,  yk);
+      cairo_set_line_width (cr, 2);
+      cairo_stroke (cr);
+
+
+      if (xp < xk) poczx = xp; else poczx = xk;
+      if (yk < yp) poczy = yk; else poczy = yp;
+
+      gtk_widget_queue_draw_area (widget, poczx-2, poczy-2, fabs(xk - xp)+4, fabs(yk - yp)+4);
+      xp = xk;
+      yp = yk;
+     }
+  cairo_destroy (cr);
+}
+
 
 /* Handle button press events by either drawing a rectangle
  * or clearing the surface, depending on which button was pressed.
@@ -472,6 +593,15 @@ FILE *fp;
 
       cairo_destroy (cr);
       gtk_widget_queue_draw (widget);
+
+      xx0 = 0;
+      xx1 = 0;
+      xx2 = 0;
+      xx3 = 0;
+      yy0 = 0;
+      yy1 = 0;
+      yy2 = 0;
+      yy3 = 0;
 
       return TRUE;
     }
@@ -652,16 +782,16 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   strcpy(tresc2, tresc);
   strcat(tresc1, ".txt");
   strcat(tresc2, ".osw");
-//KUKU
+
   if (access(tresc1, R_OK))
-  return 6;
+    return 6;
   if (access(tresc2, R_OK))
-  return 6;
+    return 6;
 
   clock_gettime(CLOCK_REALTIME, &tim);
   gtk_init (NULL, NULL);
-
   setlocale(LC_ALL,country);
+
 
   builder = gtk_builder_new ();
   if (gtk_builder_add_from_file (builder, "templ.glade", &error) == 0)
@@ -672,7 +802,7 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
     }
 
   window = gtk_builder_get_object (builder, "window");
-  sprintf(tittle, "%s 1.8", _("Graphologist"));
+  sprintf(tittle, "%s 2.1", _("Graphologist"));
   gtk_window_set_title (GTK_WINDOW (window), tittle);
   gtk_window_maximize (GTK_WINDOW (window));
 
