@@ -15,4 +15,6 @@ Instructions for adding new languages in file [locale.txt](/locale.txt)
 
 You can test this on any Linux computer, in the absence of a touch screen you can sign witch a mouse.
 
+In 2.xx version linear interpolation of signature pixels changed to 3rd degree polynomial interpolation.
+
 
