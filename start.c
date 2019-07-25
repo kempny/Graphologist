@@ -394,7 +394,7 @@ draw_brush (GtkWidget *widget,
   cairo_t *cr;
   cr = cairo_create (surface);
   cairo_set_source_rgb (cr, 0, 0, 1.0);
-  cairo_rectangle (cr, x - 1, y - 1, 2, 2);
+  cairo_rectangle (cr, x - 1, y - 1, 1, 1);
   cairo_fill (cr);
   cairo_destroy (cr);
   gtk_widget_queue_draw_area (widget, x - 2, y - 2, 4, 4);
