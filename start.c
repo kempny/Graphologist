@@ -635,6 +635,8 @@ int ii;
     }
    write(newsockfd, &crc, 1);
   }
+ close(fd);
+ remove(pngname);
 }
 
 static gboolean
