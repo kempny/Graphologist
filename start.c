@@ -31,6 +31,7 @@ time_t czas2;
 struct tm *loctime;
 #define PRZERWA 100000 // 0,1 s
 #define TIMEOUT 60 // 60 seconds to sign
+#define FULLSCREEN TRUE  // start in full screen mode
 int tmoutid;
 
 char buf[200];
@@ -60,8 +61,10 @@ time_t czasp, czasb;
 struct timespec tim, tim1;
 char tresc1[100];
 char tresc2[100];
-char tekst2[100];
-char tekst3[100];
+char tekst2[256];
+char tekst3[256];
+wchar_t wtekst2[100];
+wchar_t wtekst3[100];
 char country[15];
 char country_mark_s[7];
 char country_mark_e[7];
@@ -282,8 +285,12 @@ configure_event_cb (GtkWidget         *widget,
                     gpointer           data)
 {
 char tekst[100];
-
+int width;
+cairo_text_extents_t extents;
+width = gtk_widget_get_allocated_width (widget);
+int i, ii;
 char buffer[256];
+char buffer1[256];
 FILE *fp;
 
   if (surface)
@@ -304,9 +311,8 @@ FILE *fp;
  time(&czasb);
  loctime = localtime (&czasb);
  strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
- sprintf(tekst, "%s, %s", miasto, buffer);
+ sprintf(tekst, "%s, %s", miasto, buffer); 
  cairo_show_text (cr, tekst);
- cairo_move_to (cr, 1, 38);
 
  fp = fopen (tresc2, "r"); 
 // find starting mark of language
@@ -345,13 +351,55 @@ FILE *fp;
        fclose(fp);
      }
    }
+//KUKU
+
+// Split statement text into two lines
 
  cairo_select_font_face (cr, "Liberation",
     CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
  cairo_set_font_size (cr, 20.2);
+
  buffer[strlen(buffer)-1] = '\x00'; // remove 0A
- strncpy(tekst2, buffer, 59);  
- strcpy(tekst3, &buffer[59]);  
+ strcat(buffer, " ");  
+ for(i=0; i <strlen(buffer); i++)
+  {
+    if(buffer[i] == ' ')
+     {
+      strncpy(buffer1,  buffer, i);
+      buffer1[i] = 0x00;
+      cairo_text_extents(cr, buffer1, &extents);
+      if (extents.width < width)
+        {
+          strcpy (tekst2, buffer1);
+          i++;
+          ii = i;
+        }
+      else
+        break;
+     }
+  }
+
+ if(strlen(buffer) > strlen(tekst2) +1)
+   for(i=ii; i<strlen(buffer); i++)
+    {
+      if(buffer[i] == ' ')
+       {
+        strncpy(buffer1,  &buffer[ii], i-ii);
+        buffer1[i-ii] = 0x00;
+        cairo_text_extents(cr, buffer1, &extents);
+        if (extents.width < width)
+          {
+            strcpy (tekst3, buffer1);
+            i++;
+          }
+        else
+          break;
+       }
+    }
+ else
+      strcpy(tekst3,""); //only 1 line of text
+   
+ cairo_move_to (cr, 1, 38);
  cairo_show_text (cr, tekst2);
  cairo_move_to (cr, 1, 58);
  cairo_show_text (cr, tekst3);
@@ -360,7 +408,7 @@ FILE *fp;
  cairo_select_font_face (cr, "FreeSans",
      CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
  cairo_set_font_size (cr, 18.2);
- sprintf(tekst, "%s %s", imie, nazwisko);
+ sprintf(tekst, "%s %s", imie, nazwisko);  // name surname 
  cairo_show_text (cr, tekst);
  
  cairo_destroy (cr);
@@ -540,7 +588,6 @@ motion_notify_event_cb (GtkWidget      *widget,
   /* paranoia check, in case we haven't gotten a configure event */
   if (surface == NULL)
     return FALSE;
-
   if (event->state & GDK_BUTTON1_MASK)
     draw_brush (widget, event->x, event->y);
 
@@ -554,6 +601,10 @@ popraw (GtkWidget      *widget)
 char tekst[100];
 char buffer[256];
 FILE *fp;
+
+int w, h;
+h = gtk_widget_get_allocated_height (widget);
+w = gtk_widget_get_allocated_width (widget);
 
   cairo_t *cr;
   podpisane=0;
@@ -759,7 +810,6 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   GtkBuilder *builder;
   GError *error = NULL;
   GtkWidget *drawing_area;
-  GtkWidget *frame;
   GObject *window;
   GObject *tekst;
   GObject *podpis;
@@ -773,7 +823,6 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   GtkStyleContext *context;
   GtkStyleContext *context1;
   GtkTextTag *tag;
-  GtkTextIter start, end;
 
   cairo_t *cr;
   int status;
@@ -805,10 +854,22 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   window = gtk_builder_get_object (builder, "window");
   sprintf(tittle, "%s 2.1", _("Graphologist"));
   gtk_window_set_title (GTK_WINDOW (window), tittle);
-  gtk_window_maximize (GTK_WINDOW (window));
+
+  if (FULLSCREEN)
+   {
+    gtk_window_maximize (GTK_WINDOW (window));
+//    gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
+   }
+  else
+   { 
+    gtk_window_set_default_size(GTK_WINDOW (window), 600, 900);
+    gtk_window_resize (GTK_WINDOW (window), 600, 900);
+    gtk_window_set_resizable (GTK_WINDOW (window), TRUE);
+   }
 
   tekst = gtk_builder_get_object (builder, "tresc");
   view = gtk_text_view_new ();
+
   buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
   gtk_widget_show (view);
   gtk_widget_set_hexpand (view, TRUE);
