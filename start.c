@@ -895,22 +895,14 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   gtk_text_buffer_set_text (buffer, contents, -1);
 
   GtkCssProvider *provider = gtk_css_provider_new();
-  GtkCssProvider *provider1 = gtk_css_provider_new();
   context = gtk_widget_get_style_context (view);
-  context1 = gtk_widget_get_style_context (view);
   gtk_style_context_add_provider (context,
                                 GTK_STYLE_PROVIDER (provider),
-                                GTK_STYLE_PROVIDER_PRIORITY_USER);
-  gtk_style_context_add_provider (context1,
-                                GTK_STYLE_PROVIDER (provider1),
                                 GTK_STYLE_PROVIDER_PRIORITY_USER);
   gtk_css_provider_load_from_data (provider,
                                  "textview {"
                                  " font: 20px serif;"
-                                 "}",
-                                 -1,
-                                 NULL);
-  gtk_css_provider_load_from_data (provider1,
+                                 "}"
                                  "text {"
                                  "  color: black;"
                                  " background-color: lightgrey;"
