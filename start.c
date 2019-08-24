@@ -30,7 +30,7 @@ time_t czas1;
 time_t czas2;
 struct tm *loctime;
 #define PRZERWA 100000 // 0,1 s
-#define TIMEOUT 60 // 60 seconds to sign
+#define TIMEOUT 600 // 60 seconds to sign
 #define FULLSCREEN TRUE  // start in full screen mode
 int tmoutid;
 
@@ -44,6 +44,9 @@ int n,m,i,j,jest, firma, ret;
 time_t czas;
 char data[55];
 struct tm *loctime;
+
+double colr=0, colg=0, colb=1.0; // default line color, rgb
+double line_width = 2;           // default pen width
 
 double xx0;
 double yy0;
@@ -77,6 +80,7 @@ int sendpng();
 int odbierz();
 void catch_signal();
 void interpolate();
+void read_parm();
 
 /* S T A R T */
 void main (argc, argv)
@@ -84,6 +88,7 @@ void main (argc, argv)
      char *argv[];
 {
     signal(SIGTERM, catch_signal);
+    read_parm();
 
 // save default environment locale
     setlocale(LC_ALL,"");
@@ -239,7 +244,43 @@ void catch_signal(int signal_num)
   
 }
 
+//KUKU
+void read_parm()
+{
+  FILE *fp;
+  char buf[120];
+  char col[10];
+  char *ptr;
 
+  fp = fopen("param", "r");
+
+  while (fgets(buf, 120, fp) != NULL)
+  {
+   if (buf[0] == '#' || strlen(buf) == 1) // comments and empty lines
+     continue;
+
+   if (strncmp(buf,"linecolor", strlen("linecolor")) == 0)
+    {
+     ptr = strchr(buf,'#');
+     ptr++;
+     strcpy(col, ptr);
+     int icolr;
+     int icolg;
+     int icolb;
+     sscanf(col, "%2x%2x%2x", &icolr, &icolg, &icolb);
+     colr = (double)icolr /255;
+     colg = (double)icolg /255;
+     colb = (double)icolb /255;
+    }
+
+   if (strncmp(buf,"penwidth", strlen("penwidth")) == 0)
+    {
+     ptr = strchr(buf,'#');
+     ptr++;
+     line_width = atof(ptr);
+    }
+  }
+}
 
 int odbierz(char* tekst)
 {
@@ -273,7 +314,7 @@ clear_surface (void)
 {
   cairo_t *cr;
   cr = cairo_create (surface);
-  cairo_set_source_rgb (cr, 1, 1, 1);
+  cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
   cairo_paint (cr);
   cairo_destroy (cr);
 }
@@ -351,9 +392,8 @@ FILE *fp;
        fclose(fp);
      }
    }
-//KUKU
 
-// Split statement text into two lines
+// Split statement text into separate lines
 
  cairo_select_font_face (cr, "Liberation",
     CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
@@ -438,14 +478,19 @@ draw_brush (GtkWidget *widget,
             gdouble    x,
             gdouble    y)
 {
+
+  double ww, hh;
+  hh = gtk_widget_get_allocated_height (widget);
+  ww = gtk_widget_get_allocated_width (widget);
+
   int poczx, poczy;
   cairo_t *cr;
   cr = cairo_create (surface);
-  cairo_set_source_rgb (cr, 0, 0, 1.0);
-  cairo_rectangle (cr, x - 1, y - 1, 1, 1);
-  cairo_fill (cr);
-  cairo_destroy (cr);
-  gtk_widget_queue_draw_area (widget, x - 2, y - 2, 4, 4);
+  cairo_set_source_rgb (cr, colr, colg, colb);
+//  cairo_rectangle (cr, x - line_width/2*.7, y - line_width/2*.7, line_width*.7, line_width*.7);
+//  cairo_fill (cr);
+//  cairo_destroy (cr);
+      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
 
   if(x != xx2 || y != yy2)
    {
@@ -460,15 +505,15 @@ draw_brush (GtkWidget *widget,
        if (pointno == 1)
         {    // draw straight line between first two points 
          cr = cairo_create (surface);
-         cairo_set_source_rgb (cr, 0, 0, 1.0);
+         cairo_set_source_rgba (cr, colr, colg, colb, 1.0);
          cairo_move_to (cr, xx2,  yy2);
          cairo_line_to (cr, xx3,  yy3);
-         cairo_set_line_width (cr, 2);
+         cairo_set_line_width (cr,line_width);
          cairo_stroke (cr);
          if (xx2 < xx3) poczx = xx2; else poczx = xx3;
          if (yy2 < yy3) poczy = yy2; else poczy = yy3;
-         gtk_widget_queue_draw_area 
-              (widget, poczx-2, poczy-2, fabs(xx3 - xx2)+4, fabs(yy3 - yy2)+4);
+      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
+              (widget, poczx - line_width -2, poczy - line_width - 2, fabs(xx3 - xx2) + line_width + 4, fabs(yy3 - yy2) + line_width + 4);
         }
        if (pointno > 2)
          interpolate(widget); 
@@ -480,15 +525,15 @@ draw_brush (GtkWidget *widget,
         {    // draw straight line between last two points ,
              // cubic interpolation can not handle it
          cr = cairo_create (surface);
-         cairo_set_source_rgb (cr, 0, 0, 1.0);
+         cairo_set_source_rgba (cr, colr, colg, colb, 1.0);
          cairo_move_to (cr, xx1,  yy1);
          cairo_line_to (cr, xx2,  yy2);
-         cairo_set_line_width (cr, 2);
+         cairo_set_line_width (cr, line_width);
          cairo_stroke (cr);
          if (xx1 < xx2) poczx = xx1; else poczx = xx2;
          if (yy1 < yy2) poczy = yy1; else poczy = yy2;
-         gtk_widget_queue_draw_area
-              (widget, poczx-2, poczy-2, fabs(xx2 - xx1)+4, fabs(yy2 - yy1)+4);
+      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
+              (widget, poczx - line_width - 2, poczy - line_width - 2, fabs(xx2 - xx1)+line_width + 4, fabs(yy2 - yy1)+line_width + 4);
         }
       pointno = 0;
       xx2 = 0;
@@ -513,20 +558,25 @@ draw_brush (GtkWidget *widget,
 void interpolate(GtkWidget *widget)
 {
   cairo_t *cr;
+  double ww, hh;
+  hh = gtk_widget_get_allocated_height (widget);
+  ww = gtk_widget_get_allocated_width (widget);
 
     /* interpolate points between rectangles, cubic interpolation */
-  int poczx, poczy;
+  double poczx, poczy;
   double delta;
   double a0,a1,a2,a3;
   double xp, xk;
   double yp, yk;
 
   cr = cairo_create (surface);
-  cairo_set_source_rgb (cr, 0, 0, 1.0);
+  cairo_set_source_rgba (cr, colr, colg, colb, 1.0);
+
   xp = xx1;
   yp = yy1;
 
-  for (delta=.01; delta < .999; delta = delta + .01)
+  for (delta=0; delta < 1; delta = delta + 1/ww)
+//  for (delta=.001; delta < .999; delta = delta + .001)
      {
       a0 = -0.5*yy0 + 1.5*yy1 - 1.5*yy2 + 0.5*yy3;
       a1 = yy0 - 2.5*yy1 + 2*yy2 - 0.5*yy3;
@@ -536,14 +586,15 @@ void interpolate(GtkWidget *widget)
       xk = xx1 + delta * (xx2 - xx1);
       cairo_move_to (cr, xp,  yp);
       cairo_line_to (cr, xk,  yk);
-      cairo_set_line_width (cr, 2);
+      cairo_set_line_width (cr, line_width);
       cairo_stroke (cr);
 
 
       if (xp < xk) poczx = xp; else poczx = xk;
-      if (yk < yp) poczy = yk; else poczy = yp;
+      if (yp < yk) poczy = yp; else poczy = yk;
+//KUKU
 
-      gtk_widget_queue_draw_area (widget, poczx-2, poczy-2, fabs(xk - xp)+4, fabs(yk - yp)+4);
+      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
       xp = xk;
       yp = yk;
      }
@@ -551,8 +602,7 @@ void interpolate(GtkWidget *widget)
 }
 
 
-/* Handle button press events by either drawing a rectangle
- * or clearing the surface, depending on which button was pressed.
+/* Handle button press events by drawing a rectangle
  * The ::button-press signal handler receives a GdkEventButton
  * struct which contains this information.
  */
@@ -874,18 +924,19 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   gtk_widget_show (view);
   gtk_widget_set_hexpand (view, TRUE);
   gtk_container_add(GTK_CONTAINER(tekst) , view);
+
   file = g_file_new_for_path(tresc1);
-  if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
-   {
-    gtk_text_buffer_set_text (buffer, contents, length);
-   }
+  g_file_load_contents (file, NULL, &contents, &length, NULL, NULL);
 
 // find the text in the right language
   if(strstr(contents, country_mark_s) != NULL &&
      strstr(contents, country_mark_e) != NULL)
    {
      memmove(contents, strstr(contents, country_mark_s), length);
-     strcpy(contents, strchr(contents, '\n'));
+
+     char cc1[strlen(contents)];
+     strcpy(cc1, strchr(contents, '\n'));
+     strcpy(contents, cc1);
      memset(strstr(contents, country_mark_e), 0,1);
    }
   else

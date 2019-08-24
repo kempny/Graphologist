@@ -1,0 +1,8 @@
+# pen color
+linecolor #0000ff
+
+# statement text color
+statementcolor #ffffff
+
+# pen line width
+penwidth #2 
