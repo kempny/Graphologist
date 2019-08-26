@@ -2,7 +2,7 @@
 linecolor #0000ff
 
 # statement text color
-statementcolor #ffffff
+statementcolor #000000
 
 # pen line width
 penwidth #2 

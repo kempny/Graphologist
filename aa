@@ -30,8 +30,7 @@ time_t czas1;
 time_t czas2;
 struct tm *loctime;
 #define PRZERWA 100000 // 0,1 s
-#define TIMEOUT 600 // 60 seconds to sign
-#define FULLSCREEN TRUE  // start in full screen mode
+#define TIMEOUT 60 // 60 seconds to sign
 int tmoutid;
 
 char buf[200];
@@ -44,10 +43,6 @@ int n,m,i,j,jest, firma, ret;
 time_t czas;
 char data[55];
 struct tm *loctime;
-
-double colr=0, colg=0, colb=1.0; // default line color, rgb
-double scolr=1.0, scolg=1.0, scolb=1.0; // default statement text color, rgb
-double line_width = 2;           // default pen width
 
 double xx0;
 double yy0;
@@ -65,10 +60,8 @@ time_t czasp, czasb;
 struct timespec tim, tim1;
 char tresc1[100];
 char tresc2[100];
-char tekst2[256];
-char tekst3[256];
-wchar_t wtekst2[100];
-wchar_t wtekst3[100];
+char tekst2[100];
+char tekst3[100];
 char country[15];
 char country_mark_s[7];
 char country_mark_e[7];
@@ -81,7 +74,6 @@ int sendpng();
 int odbierz();
 void catch_signal();
 void interpolate();
-void read_parm();
 
 /* S T A R T */
 void main (argc, argv)
@@ -89,7 +81,6 @@ void main (argc, argv)
      char *argv[];
 {
     signal(SIGTERM, catch_signal);
-    read_parm();
 
 // save default environment locale
     setlocale(LC_ALL,"");
@@ -245,53 +236,7 @@ void catch_signal(int signal_num)
   
 }
 
-void read_parm()
-{
-  FILE *fp;
-  char buf[120];
-  char col[10];
-  char *ptr;
-  int icolr;
-  int icolg;
-  int icolb;
 
-  fp = fopen("param", "r");
-
-  while (fgets(buf, 120, fp) != NULL)
-  {
-   if (buf[0] == '#' || strlen(buf) == 1) // comments and empty lines
-     continue;
-
-   if (strncmp(buf,"linecolor", strlen("linecolor")) == 0)
-    {
-     ptr = strchr(buf,'#');
-     ptr++;
-     strcpy(col, ptr);
-     sscanf(col, "%2x%2x%2x", &icolr, &icolg, &icolb);
-     colr = (double)icolr /255;
-     colg = (double)icolg /255;
-     colb = (double)icolb /255;
-    }
-
-   if (strncmp(buf,"statementcolor", strlen("statementcolor")) == 0)
-    {
-     ptr = strchr(buf,'#');
-     ptr++;
-     strcpy(col, ptr);
-     sscanf(col, "%2x%2x%2x", &icolr, &icolg, &icolb);
-     scolr = (double)icolr /255;
-     scolg = (double)icolg /255;
-     scolb = (double)icolb /255;
-    }
-
-   if (strncmp(buf,"penwidth", strlen("penwidth")) == 0)
-    {
-     ptr = strchr(buf,'#');
-     ptr++;
-     line_width = atof(ptr);
-    }
-  }
-}
 
 int odbierz(char* tekst)
 {
@@ -325,7 +270,7 @@ clear_surface (void)
 {
   cairo_t *cr;
   cr = cairo_create (surface);
-  cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
+  cairo_set_source_rgb (cr, 1, 1, 1);
   cairo_paint (cr);
   cairo_destroy (cr);
 }
@@ -337,12 +282,8 @@ configure_event_cb (GtkWidget         *widget,
                     gpointer           data)
 {
 char tekst[100];
-int width;
-cairo_text_extents_t extents;
-width = gtk_widget_get_allocated_width (widget);
-int i, ii;
+
 char buffer[256];
-char buffer1[256];
 FILE *fp;
 
   if (surface)
@@ -359,13 +300,13 @@ FILE *fp;
  cairo_select_font_face (cr, "FreeSans",
     CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
  cairo_move_to (cr, 1, 15);
- cairo_set_source_rgb(cr, scolr, scolg, scolb); 
  cairo_set_font_size (cr, 18.2);
  time(&czasb);
  loctime = localtime (&czasb);
  strftime (buffer, 50, "%d-%m-%Y  %H:%M", loctime);
- sprintf(tekst, "%s, %s", miasto, buffer); 
+ sprintf(tekst, "%s, %s", miasto, buffer);
  cairo_show_text (cr, tekst);
+ cairo_move_to (cr, 1, 38);
 
  fp = fopen (tresc2, "r"); 
 // find starting mark of language
@@ -405,51 +346,12 @@ FILE *fp;
      }
    }
 
-// Split statement text into separate lines
  cairo_select_font_face (cr, "Liberation",
     CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
  cairo_set_font_size (cr, 20.2);
  buffer[strlen(buffer)-1] = '\x00'; // remove 0A
- strcat(buffer, " ");  
- for(i=0; i <strlen(buffer); i++)
-  {
-    if(buffer[i] == ' ')
-     {
-      strncpy(buffer1,  buffer, i);
-      buffer1[i] = 0x00;
-      cairo_text_extents(cr, buffer1, &extents);
-      if (extents.width < width)
-        {
-          strcpy (tekst2, buffer1);
-          i++;
-          ii = i;
-        }
-      else
-        break;
-     }
-  }
-
- if(strlen(buffer) > strlen(tekst2) +1)
-   for(i=ii; i<strlen(buffer); i++)
-    {
-      if(buffer[i] == ' ')
-       {
-        strncpy(buffer1,  &buffer[ii], i-ii);
-        buffer1[i-ii] = 0x00;
-        cairo_text_extents(cr, buffer1, &extents);
-        if (extents.width < width)
-          {
-            strcpy (tekst3, buffer1);
-            i++;
-          }
-        else
-          break;
-       }
-    }
- else
-      strcpy(tekst3,""); //only 1 line of text
-//KUKU
- cairo_move_to (cr, 1, 38);
+ strncpy(tekst2, buffer, 59);  
+ strcpy(tekst3, &buffer[59]);  
  cairo_show_text (cr, tekst2);
  cairo_move_to (cr, 1, 58);
  cairo_show_text (cr, tekst3);
@@ -458,7 +360,7 @@ FILE *fp;
  cairo_select_font_face (cr, "FreeSans",
      CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
  cairo_set_font_size (cr, 18.2);
- sprintf(tekst, "%s %s", imie, nazwisko);  // name surname 
+ sprintf(tekst, "%s %s", imie, nazwisko);
  cairo_show_text (cr, tekst);
  
  cairo_destroy (cr);
@@ -488,19 +390,14 @@ draw_brush (GtkWidget *widget,
             gdouble    x,
             gdouble    y)
 {
-
-  double ww, hh;
-  hh = gtk_widget_get_allocated_height (widget);
-  ww = gtk_widget_get_allocated_width (widget);
-
   int poczx, poczy;
   cairo_t *cr;
   cr = cairo_create (surface);
-  cairo_set_source_rgb (cr, colr, colg, colb);
-//  cairo_rectangle (cr, x - line_width/2*.7, y - line_width/2*.7, line_width*.7, line_width*.7);
-//  cairo_fill (cr);
-//  cairo_destroy (cr);
-      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
+  cairo_set_source_rgb (cr, 0, 0, 1.0);
+  cairo_rectangle (cr, x - 1, y - 1, 1, 1);
+  cairo_fill (cr);
+  cairo_destroy (cr);
+  gtk_widget_queue_draw_area (widget, x - 2, y - 2, 4, 4);
 
   if(x != xx2 || y != yy2)
    {
@@ -515,15 +412,15 @@ draw_brush (GtkWidget *widget,
        if (pointno == 1)
         {    // draw straight line between first two points 
          cr = cairo_create (surface);
-         cairo_set_source_rgba (cr, colr, colg, colb, 1.0);
+         cairo_set_source_rgb (cr, 0, 0, 1.0);
          cairo_move_to (cr, xx2,  yy2);
          cairo_line_to (cr, xx3,  yy3);
-         cairo_set_line_width (cr,line_width);
+         cairo_set_line_width (cr, 2);
          cairo_stroke (cr);
          if (xx2 < xx3) poczx = xx2; else poczx = xx3;
          if (yy2 < yy3) poczy = yy2; else poczy = yy3;
-      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
-              (widget, poczx - line_width -2, poczy - line_width - 2, fabs(xx3 - xx2) + line_width + 4, fabs(yy3 - yy2) + line_width + 4);
+         gtk_widget_queue_draw_area 
+              (widget, poczx-2, poczy-2, fabs(xx3 - xx2)+4, fabs(yy3 - yy2)+4);
         }
        if (pointno > 2)
          interpolate(widget); 
@@ -535,15 +432,15 @@ draw_brush (GtkWidget *widget,
         {    // draw straight line between last two points ,
              // cubic interpolation can not handle it
          cr = cairo_create (surface);
-         cairo_set_source_rgba (cr, colr, colg, colb, 1.0);
+         cairo_set_source_rgb (cr, 0, 0, 1.0);
          cairo_move_to (cr, xx1,  yy1);
          cairo_line_to (cr, xx2,  yy2);
-         cairo_set_line_width (cr, line_width);
+         cairo_set_line_width (cr, 2);
          cairo_stroke (cr);
          if (xx1 < xx2) poczx = xx1; else poczx = xx2;
          if (yy1 < yy2) poczy = yy1; else poczy = yy2;
-      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
-              (widget, poczx - line_width - 2, poczy - line_width - 2, fabs(xx2 - xx1)+line_width + 4, fabs(yy2 - yy1)+line_width + 4);
+         gtk_widget_queue_draw_area
+              (widget, poczx-2, poczy-2, fabs(xx2 - xx1)+4, fabs(yy2 - yy1)+4);
         }
       pointno = 0;
       xx2 = 0;
@@ -568,25 +465,20 @@ draw_brush (GtkWidget *widget,
 void interpolate(GtkWidget *widget)
 {
   cairo_t *cr;
-  double ww, hh;
-  hh = gtk_widget_get_allocated_height (widget);
-  ww = gtk_widget_get_allocated_width (widget);
 
     /* interpolate points between rectangles, cubic interpolation */
-  double poczx, poczy;
+  int poczx, poczy;
   double delta;
   double a0,a1,a2,a3;
   double xp, xk;
   double yp, yk;
 
   cr = cairo_create (surface);
-  cairo_set_source_rgba (cr, colr, colg, colb, 1.0);
-
+  cairo_set_source_rgb (cr, 0, 0, 1.0);
   xp = xx1;
   yp = yy1;
 
-  for (delta=0; delta < 1; delta = delta + 1/ww)
-//  for (delta=.001; delta < .999; delta = delta + .001)
+  for (delta=.01; delta < .999; delta = delta + .01)
      {
       a0 = -0.5*yy0 + 1.5*yy1 - 1.5*yy2 + 0.5*yy3;
       a1 = yy0 - 2.5*yy1 + 2*yy2 - 0.5*yy3;
@@ -596,15 +488,14 @@ void interpolate(GtkWidget *widget)
       xk = xx1 + delta * (xx2 - xx1);
       cairo_move_to (cr, xp,  yp);
       cairo_line_to (cr, xk,  yk);
-      cairo_set_line_width (cr, line_width);
+      cairo_set_line_width (cr, 2);
       cairo_stroke (cr);
 
 
       if (xp < xk) poczx = xp; else poczx = xk;
-      if (yp < yk) poczy = yp; else poczy = yk;
-//KUKU
+      if (yk < yp) poczy = yk; else poczy = yp;
 
-      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
+      gtk_widget_queue_draw_area (widget, poczx-2, poczy-2, fabs(xk - xp)+4, fabs(yk - yp)+4);
       xp = xk;
       yp = yk;
      }
@@ -612,7 +503,8 @@ void interpolate(GtkWidget *widget)
 }
 
 
-/* Handle button press events by drawing a rectangle
+/* Handle button press events by either drawing a rectangle
+ * or clearing the surface, depending on which button was pressed.
  * The ::button-press signal handler receives a GdkEventButton
  * struct which contains this information.
  */
@@ -648,6 +540,7 @@ motion_notify_event_cb (GtkWidget      *widget,
   /* paranoia check, in case we haven't gotten a configure event */
   if (surface == NULL)
     return FALSE;
+
   if (event->state & GDK_BUTTON1_MASK)
     draw_brush (widget, event->x, event->y);
 
@@ -662,10 +555,6 @@ char tekst[100];
 char buffer[256];
 FILE *fp;
 
-int w, h;
-h = gtk_widget_get_allocated_height (widget);
-w = gtk_widget_get_allocated_width (widget);
-
   cairo_t *cr;
   podpisane=0;
   if (surface)
@@ -679,7 +568,6 @@ w = gtk_widget_get_allocated_width (widget);
       cr = cairo_create (surface);
       cairo_select_font_face (cr, "FreeSans",
          CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-      cairo_set_source_rgb(cr, scolr, scolg, scolb); 
       cairo_move_to (cr, 1, 15);
       cairo_set_font_size (cr, 18.2);
       time(&czasb);
@@ -871,6 +759,7 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   GtkBuilder *builder;
   GError *error = NULL;
   GtkWidget *drawing_area;
+  GtkWidget *frame;
   GObject *window;
   GObject *tekst;
   GObject *podpis;
@@ -884,6 +773,7 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   GtkStyleContext *context;
   GtkStyleContext *context1;
   GtkTextTag *tag;
+  GtkTextIter start, end;
 
   cairo_t *cr;
   int status;
@@ -915,39 +805,26 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   window = gtk_builder_get_object (builder, "window");
   sprintf(tittle, "%s 2.1", _("Graphologist"));
   gtk_window_set_title (GTK_WINDOW (window), tittle);
-
-  if (FULLSCREEN)
-   {
-    gtk_window_maximize (GTK_WINDOW (window));
-//    gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-   }
-  else
-   { 
-    gtk_window_set_default_size(GTK_WINDOW (window), 600, 900);
-    gtk_window_resize (GTK_WINDOW (window), 600, 900);
-    gtk_window_set_resizable (GTK_WINDOW (window), TRUE);
-   }
+  gtk_window_maximize (GTK_WINDOW (window));
 
   tekst = gtk_builder_get_object (builder, "tresc");
   view = gtk_text_view_new ();
-
   buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
   gtk_widget_show (view);
   gtk_widget_set_hexpand (view, TRUE);
   gtk_container_add(GTK_CONTAINER(tekst) , view);
-
   file = g_file_new_for_path(tresc1);
-  g_file_load_contents (file, NULL, &contents, &length, NULL, NULL);
+  if (g_file_load_contents (file, NULL, &contents, &length, NULL, NULL))
+   {
+    gtk_text_buffer_set_text (buffer, contents, length);
+   }
 
 // find the text in the right language
   if(strstr(contents, country_mark_s) != NULL &&
      strstr(contents, country_mark_e) != NULL)
    {
      memmove(contents, strstr(contents, country_mark_s), length);
-
-     char cc1[strlen(contents)];
-     strcpy(cc1, strchr(contents, '\n'));
-     strcpy(contents, cc1);
+     strcpy(contents, strchr(contents, '\n'));
      memset(strstr(contents, country_mark_e), 0,1);
    }
   else
@@ -955,6 +832,30 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
      strcpy(contents, _("No text in this language!"));
    }
   gtk_text_buffer_set_text (buffer, contents, -1);
+
+  GtkCssProvider *provider = gtk_css_provider_new();
+  GtkCssProvider *provider1 = gtk_css_provider_new();
+  context = gtk_widget_get_style_context (view);
+  context1 = gtk_widget_get_style_context (view);
+  gtk_style_context_add_provider (context,
+                                GTK_STYLE_PROVIDER (provider),
+                                GTK_STYLE_PROVIDER_PRIORITY_USER);
+  gtk_style_context_add_provider (context1,
+                                GTK_STYLE_PROVIDER (provider1),
+                                GTK_STYLE_PROVIDER_PRIORITY_USER);
+  gtk_css_provider_load_from_data (provider,
+                                 "textview {"
+                                 " font: 20px serif;"
+                                 "}",
+                                 -1,
+                                 NULL);
+  gtk_css_provider_load_from_data (provider1,
+                                 "text {"
+                                 "  color: black;"
+                                 " background-color: lightgrey;"
+                                 "}",
+                                 -1,
+                                 NULL);
 
   gtk_text_view_set_left_margin (GTK_TEXT_VIEW (view), 3);
 
@@ -994,7 +895,7 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   g_signal_connect_swapped (button, "clicked", G_CALLBACK (wyslij), drawing_area), window;
 
   GtkCssProvider *cssProvider = gtk_css_provider_new();
-  gtk_css_provider_load_from_path(cssProvider, "./start.css", NULL);
+  gtk_css_provider_load_from_path(cssProvider, "./button.css", NULL);
   gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
                                GTK_STYLE_PROVIDER(cssProvider),
                                GTK_STYLE_PROVIDER_PRIORITY_USER);
@@ -1003,4 +904,5 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   g_source_remove(tmoutid);
   return ret;
 }
+
 
