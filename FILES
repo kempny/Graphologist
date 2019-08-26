@@ -4,8 +4,9 @@ FILES          this text
 INSTALL        install procedure
 locale.txt     localization procedure
 templ.glade    glade template
-button.css     css for buttons
+start.css      css for buttons and scrolled part of window
 start.c        signature server program
 wyswietl.c     example client program
 tekst.osw      statement to display in signing area 
 tekst.txt      Content of the statement displayed in scrolled part of window 
+param          look of text, pen color and line width in signing area

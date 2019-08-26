@@ -1,0 +1,68 @@
+/***************************************************************
+Buttons and scrolled window look and behavior.
+Signing area text look, pen line color and width defined in file param 
+You can change the parameters in this file and 'param'
+without need to recompile the main program
+***************************************************************/
+
+/* buttons */
+button#but1 {
+  color: #000000;
+  background-color: #ffffcc;
+;
+background-image: -gtk-gradient (linear,
+                                     left top, left bottom,
+                                     from (@bg_color),
+                                     to (shade (@bg_color, 0.95)));
+  font: 18px "Comic Sans";
+}
+
+button#but2 {
+  color: #000000;
+  background-color: #ff3333;
+background-image: -gtk-gradient (linear,
+                                     left top, left bottom,
+                                     from (@bg_color),
+                                     to (shade (@bg_color, 0.95)));
+  font: 18px "Comic Sans";
+}
+
+button#but3 {
+  color: #000000;
+  background-color: #66ff66;
+background-image: -gtk-gradient (linear,
+                                     left top, left bottom,
+                                     from (@bg_color),
+                                     to (shade (@bg_color, 0.95)));
+  font: 18px "Comic Sans";
+}
+
+button#but1:hover {
+  color: #000000;
+transition: 400ms ease-in-out;
+  background-color: lightgrey;
+}
+
+button#but2:hover {
+  color: #000000;
+transition: 400ms ease-in-out;
+  background-color: lightgrey;
+}
+
+button#but3:hover {
+  color: #000000;
+transition: 400ms ease-in-out;
+  background-color: lightgrey;
+}
+
+/* statement text */
+textview {
+  font: 20px serif;
+}
+
+/* statement text scrolled window */
+text {
+  color: black;
+  background-color: lightgrey;
+}
+
