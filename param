@@ -6,3 +6,9 @@ statementcolor #000000
 
 # pen line width
 penwidth #2 
+
+# time to sign the statement
+signtimeout #60 
+
+# start in fullscreen mode = 1, normal window = 0 
+fullscreen #1

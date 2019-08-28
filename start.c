@@ -30,9 +30,9 @@ time_t czas1;
 time_t czas2;
 struct tm *loctime;
 #define PRZERWA 100000 // 0,1 s
-#define TIMEOUT 600 // 60 seconds to sign
-#define FULLSCREEN TRUE  // start in full screen mode
 int tmoutid;
+int tmoutid1;
+int time_left;
 
 char buf[200];
 char name[100];
@@ -48,6 +48,8 @@ struct tm *loctime;
 double colr=0, colg=0, colb=1.0; // default line color, rgb
 double scolr=1.0, scolg=1.0, scolb=1.0; // default statement text color, rgb
 double line_width = 2;           // default pen width
+int time_to_sign  = 60;          // default time to sign the statement
+int fullscreen = 1; // defaulf full screen mode
 
 double xx0;
 double yy0;
@@ -290,6 +292,20 @@ void read_parm()
      ptr++;
      line_width = atof(ptr);
     }
+
+   if (strncmp(buf,"signtimeout", strlen("signtimeout")) == 0)
+    {
+     ptr = strchr(buf,'#');
+     ptr++;
+     time_to_sign = atoi(ptr);
+    }
+
+   if (strncmp(buf,"fullscreen", strlen("fullscreen")) == 0)
+    {
+     ptr = strchr(buf,'#');
+     ptr++;
+     fullscreen = atoi(ptr);
+    }
   }
 }
 
@@ -404,7 +420,6 @@ FILE *fp;
        fclose(fp);
      }
    }
-
 // Split statement text into separate lines
  cairo_select_font_face (cr, "Liberation",
     CAIRO_FONT_SLANT_ITALIC, CAIRO_FONT_WEIGHT_NORMAL);
@@ -447,22 +462,21 @@ FILE *fp;
        }
     }
  else
-      strcpy(tekst3,""); //only 1 line of text
-//KUKU
- cairo_move_to (cr, 1, 38);
- cairo_show_text (cr, tekst2);
- cairo_move_to (cr, 1, 58);
- cairo_show_text (cr, tekst3);
+   strcpy(tekst3,""); //only 1 line of text
+   cairo_move_to (cr, 1, 38);
+   cairo_show_text (cr, tekst2);
+   cairo_move_to (cr, 1, 58);
+   cairo_show_text (cr, tekst3);
 
- cairo_move_to (cr, 1, 80);
- cairo_select_font_face (cr, "FreeSans",
+   cairo_move_to (cr, 1, 80);
+   cairo_select_font_face (cr, "FreeSans",
      CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
- cairo_set_font_size (cr, 18.2);
- sprintf(tekst, "%s %s", imie, nazwisko);  // name surname 
- cairo_show_text (cr, tekst);
+   cairo_set_font_size (cr, 18.2);
+   sprintf(tekst, "%s %s", imie, nazwisko);  // name surname 
+   cairo_show_text (cr, tekst);
  
- cairo_destroy (cr);
-       gtk_widget_queue_draw (widget);
+   cairo_destroy (cr);
+   gtk_widget_queue_draw (widget);
  
  return TRUE;
 }
@@ -497,9 +511,6 @@ draw_brush (GtkWidget *widget,
   cairo_t *cr;
   cr = cairo_create (surface);
   cairo_set_source_rgb (cr, colr, colg, colb);
-//  cairo_rectangle (cr, x - line_width/2*.7, y - line_width/2*.7, line_width*.7, line_width*.7);
-//  cairo_fill (cr);
-//  cairo_destroy (cr);
       gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
 
   if(x != xx2 || y != yy2)
@@ -602,7 +613,6 @@ void interpolate(GtkWidget *widget)
 
       if (xp < xk) poczx = xp; else poczx = xk;
       if (yp < yk) poczy = yp; else poczy = yk;
-//KUKU
 
       gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
       xp = xk;
@@ -826,9 +836,6 @@ wyslij (GtkWidget      *widget, GtkWindow *window)
     cairo_move_to (cr, 1, 58);
     cairo_show_text (cr, tekst3);
 
-
-
-
     cairo_move_to (cr, 1, 80);
     cairo_select_font_face (cr, "FreeSans",
        CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
@@ -850,6 +857,39 @@ tmout (gpointer      window)
         gtk_main_iteration ();
       gtk_main_quit();
       ret = 3;
+      return FALSE;
+    }
+
+
+static gboolean
+disp_time (gpointer      widget)
+    {
+      double width, height;
+      char tekst[10];
+      cairo_t *cr;
+      cairo_text_extents_t extents;
+      width = gtk_widget_get_allocated_width (widget);
+      height = gtk_widget_get_allocated_height (widget);
+      while (gtk_events_pending ())
+        gtk_main_iteration ();
+      cr = cairo_create (surface);
+      cairo_select_font_face (cr, "courier",
+        CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+      cairo_set_source_rgb(cr, scolr, scolg, scolb); 
+      cairo_set_font_size (cr, 25.2);
+      cairo_text_extents(cr, "9999", &extents);
+      cairo_rectangle (cr, width - 5 - extents.width, height - 1.2 * extents.height, extents.width + 5, 1.2 * extents.height);
+      cairo_set_source_rgb(cr, 1, 1, 1); 
+      cairo_fill (cr);
+      gtk_widget_queue_draw (widget);
+      cairo_set_source_rgb(cr, scolr, scolg, scolb); 
+      sprintf(tekst, "%d", time_left--); 
+      cairo_text_extents(cr, tekst, &extents);
+      cairo_move_to (cr, width - 5 - extents.width, height);
+      cairo_show_text (cr, tekst);
+      cairo_destroy (cr);
+      gtk_widget_queue_draw (widget);
+      tmoutid1=g_timeout_add_seconds (1, disp_time, widget ) ;
       return FALSE;
     }
 
@@ -916,11 +956,8 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   sprintf(tittle, "%s 2.1", _("Graphologist"));
   gtk_window_set_title (GTK_WINDOW (window), tittle);
 
-  if (FULLSCREEN)
-   {
+  if (fullscreen == 1)
     gtk_window_maximize (GTK_WINDOW (window));
-//    gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
-   }
   else
    { 
     gtk_window_set_default_size(GTK_WINDOW (window), 600, 900);
@@ -998,9 +1035,12 @@ sign (char *tresc, char *miasto, char *imie, char *nazwisko)
   gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
                                GTK_STYLE_PROVIDER(cssProvider),
                                GTK_STYLE_PROVIDER_PRIORITY_USER);
-  tmoutid=g_timeout_add_seconds (TIMEOUT, tmout, window ) ;
+  tmoutid=g_timeout_add_seconds (time_to_sign, tmout, window ) ;
+  time_left = time_to_sign;
+  tmoutid1=g_timeout_add_seconds (1, disp_time, drawing_area ) ;
   gtk_main ();
   g_source_remove(tmoutid);
+  g_source_remove(tmoutid1);
   return ret;
 }
 
