@@ -513,7 +513,12 @@ draw_brush (GtkWidget *widget,
   cairo_t *cr;
   cr = cairo_create (surface);
   cairo_set_source_rgb (cr, colr, colg, colb);
-      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
+  cairo_move_to (cr, x,  y);
+  cairo_line_to (cr, x,  y);
+  cairo_set_line_width (cr, line_width);
+  cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+  cairo_stroke (cr);
+  gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
 
   if(x != xx2 || y != yy2)
    {
@@ -532,6 +537,7 @@ draw_brush (GtkWidget *widget,
          cairo_move_to (cr, xx2,  yy2);
          cairo_line_to (cr, xx3,  yy3);
          cairo_set_line_width (cr,line_width);
+         cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
          cairo_stroke (cr);
          if (xx2 < xx3) poczx = xx2; else poczx = xx3;
          if (yy2 < yy3) poczy = yy2; else poczy = yy3;
@@ -552,11 +558,11 @@ draw_brush (GtkWidget *widget,
          cairo_move_to (cr, xx1,  yy1);
          cairo_line_to (cr, xx2,  yy2);
          cairo_set_line_width (cr, line_width);
+         cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
          cairo_stroke (cr);
          if (xx1 < xx2) poczx = xx1; else poczx = xx2;
          if (yy1 < yy2) poczy = yy1; else poczy = yy2;
-      gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
-              (widget, poczx - line_width - 2, poczy - line_width - 2, fabs(xx2 - xx1)+line_width + 4, fabs(yy2 - yy1)+line_width + 4);
+         gtk_widget_queue_draw_area (widget, 0, 0, ww, hh);
         }
       pointno = 0;
       xx2 = 0;
@@ -593,13 +599,14 @@ void interpolate(GtkWidget *widget)
   double yp, yk;
 
   cr = cairo_create (surface);
+
+
   cairo_set_source_rgba (cr, colr, colg, colb, 1.0);
 
   xp = xx1;
   yp = yy1;
 
-  for (delta=0; delta < 1; delta = delta + 1/ww)
-//  for (delta=.001; delta < .999; delta = delta + .001)
+  for (delta=.001; delta < .999; delta = delta + .05)
      {
       a0 = -0.5*yy0 + 1.5*yy1 - 1.5*yy2 + 0.5*yy3;
       a1 = yy0 - 2.5*yy1 + 2*yy2 - 0.5*yy3;
@@ -610,6 +617,7 @@ void interpolate(GtkWidget *widget)
       cairo_move_to (cr, xp,  yp);
       cairo_line_to (cr, xk,  yk);
       cairo_set_line_width (cr, line_width);
+      cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
       cairo_stroke (cr);
 
 
