@@ -258,55 +258,57 @@ void read_parm()
   int icolb;
 
   fp = fopen("param", "r");
+  if ( fp != NULL)
+   {
+     while (fgets(buf, 120, fp) != NULL)
+     {
+      if (buf[0] == '#' || strlen(buf) == 1) // comments and empty lines
+        continue;
 
-  while (fgets(buf, 120, fp) != NULL)
-  {
-   if (buf[0] == '#' || strlen(buf) == 1) // comments and empty lines
-     continue;
+      if (strncmp(buf,"linecolor", strlen("linecolor")) == 0)
+       {
+        ptr = strchr(buf,'#');
+        ptr++;
+        strcpy(col, ptr);
+        sscanf(col, "%2x%2x%2x", &icolr, &icolg, &icolb);
+        colr = (double)icolr /255;
+        colg = (double)icolg /255;
+        colb = (double)icolb /255;
+       }
 
-   if (strncmp(buf,"linecolor", strlen("linecolor")) == 0)
-    {
-     ptr = strchr(buf,'#');
-     ptr++;
-     strcpy(col, ptr);
-     sscanf(col, "%2x%2x%2x", &icolr, &icolg, &icolb);
-     colr = (double)icolr /255;
-     colg = (double)icolg /255;
-     colb = (double)icolb /255;
-    }
+      if (strncmp(buf,"statementcolor", strlen("statementcolor")) == 0)
+       {
+        ptr = strchr(buf,'#');
+        ptr++;
+        strcpy(col, ptr);
+        sscanf(col, "%2x%2x%2x", &icolr, &icolg, &icolb);
+        scolr = (double)icolr /255;
+        scolg = (double)icolg /255;
+        scolb = (double)icolb /255;
+       }
 
-   if (strncmp(buf,"statementcolor", strlen("statementcolor")) == 0)
-    {
-     ptr = strchr(buf,'#');
-     ptr++;
-     strcpy(col, ptr);
-     sscanf(col, "%2x%2x%2x", &icolr, &icolg, &icolb);
-     scolr = (double)icolr /255;
-     scolg = (double)icolg /255;
-     scolb = (double)icolb /255;
-    }
+      if (strncmp(buf,"penwidth", strlen("penwidth")) == 0)
+       {
+        ptr = strchr(buf,'#');
+        ptr++;
+        line_width = atof(ptr);
+       }
 
-   if (strncmp(buf,"penwidth", strlen("penwidth")) == 0)
-    {
-     ptr = strchr(buf,'#');
-     ptr++;
-     line_width = atof(ptr);
-    }
+      if (strncmp(buf,"signtimeout", strlen("signtimeout")) == 0)
+       {
+        ptr = strchr(buf,'#');
+        ptr++;
+        time_to_sign = atoi(ptr);
+       }
 
-   if (strncmp(buf,"signtimeout", strlen("signtimeout")) == 0)
-    {
-     ptr = strchr(buf,'#');
-     ptr++;
-     time_to_sign = atoi(ptr);
-    }
-
-   if (strncmp(buf,"fullscreen", strlen("fullscreen")) == 0)
-    {
-     ptr = strchr(buf,'#');
-     ptr++;
-     fullscreen = atoi(ptr);
-    }
-  }
+      if (strncmp(buf,"fullscreen", strlen("fullscreen")) == 0)
+       {
+        ptr = strchr(buf,'#');
+        ptr++;
+        fullscreen = atoi(ptr);
+       }
+     }
+   }
 }
 
 int odbierz(char* tekst)
